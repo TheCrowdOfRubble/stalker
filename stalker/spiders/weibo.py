@@ -39,7 +39,6 @@ class WeiboSpider(scrapy.Spider):
         """
         用以处理个人资料页，需要带着个人微博页的信息
         """
-
         def parse_profile(response: scrapy.http.Response) -> items.UserItem:
             for profile in response.css(".c")[3].xpath("./text()"):
                 key: str = profile.re_first(r'^.+(?=:|：)', "")
