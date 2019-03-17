@@ -25,6 +25,8 @@ class UserItem(scrapy.Item):
     weibo_expert = scrapy.Field()  # 微博达人
     sexual_orientation = scrapy.Field()
     relationship_status = scrapy.Field()  # 感情状况
+    create_time = scrapy.Field()
+    modify_time = scrapy.Field()
 
 
 class WeiboItem(scrapy.Item):
@@ -37,6 +39,9 @@ class WeiboItem(scrapy.Item):
     comment_amount = scrapy.Field()
     like_amount = scrapy.Field()
     origin_weibo_id = scrapy.Field()
+    platform = scrapy.Field()
+    create_time = scrapy.Field()
+    modify_time = scrapy.Field()
 
 
 PROFILE_FIELD_CN_TO_EN = {

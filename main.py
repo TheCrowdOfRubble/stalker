@@ -1,3 +1,6 @@
 if __name__ == '__main__':
     from scrapy import cmdline
-    cmdline.execute(['scrapy', 'crawl', 'weibo'])
+    cmdline.execute([
+        'scrapy', 'crawl', 'weibo',
+        # '-o', 'weiboes.csv'
+    ])
