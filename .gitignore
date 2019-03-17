@@ -124,3 +124,6 @@ dmypy.json
 
 # IDE & editor
 .idea
+
+# Accounts
+stalker/accounts/*.json
