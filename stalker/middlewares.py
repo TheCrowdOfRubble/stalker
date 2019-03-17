@@ -15,7 +15,7 @@ from scrapy import signals
 import fake_useragent
 import stalker.utils as utils
 
-
+'''
 class StalkerSpiderMiddleware(object):
     # Not all methods need to be defined. If a method is not defined,
     # scrapy acts as if the spider middleware does not modify the
@@ -109,6 +109,7 @@ class StalkerDownloaderMiddleware(object):
 
     def spider_opened(self, spider):
         spider.logger.info('Spider opened: %s' % spider.name)
+'''
 
 
 T = typing.TypeVar('T', bound='RandomUserAgentMiddleware')
@@ -119,7 +120,7 @@ class RandomUserAgentMiddleware(object):
     ua: fake_useragent.UserAgent
 
     def __init__(self, crawler: scrapy.spiders.Spider) -> type(None):
-        self.ua = fake_useragent.UserAgent(fallback=crawler.settings.get('DEFAULT_USER_AGENT', None))
+        self.ua = fake_useragent.UserAgent(fallback=crawler.settings.get('USER_AGENT', None))
 
     @classmethod
     def from_crawler(cls: typing.Type[T], crawler: scrapy.spiders.Spider) -> T:

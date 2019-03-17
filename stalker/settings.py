@@ -16,7 +16,8 @@ NEWSPIDER_MODULE = 'stalker.spiders'
 
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
-#USER_AGENT = 'stalker (+http://www.yourdomain.com)'
+USER_AGENT = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.121 ' \
+                     'Safari/537.36 '
 
 # Obey robots.txt rules
 ROBOTSTXT_OBEY = False
@@ -36,7 +37,7 @@ ROBOTSTXT_OBEY = False
 #COOKIES_ENABLED = False
 
 # Disable Telnet Console (enabled by default)
-#TELNETCONSOLE_ENABLED = False
+TELNETCONSOLE_ENABLED = False
 
 # Override the default request headers:
 #DEFAULT_REQUEST_HEADERS = {
@@ -98,26 +99,70 @@ DOWNLOADER_MIDDLEWARES = {
 
 # log
 LOG_ENABLED = False
+'''
+# Scrapy-Redis
+# Enables scheduling storing requests queue in redis.
+SCHEDULER = "scrapy_redis.scheduler.Scheduler"
 
-# default user-agent
-DEFAULT_USER_AGENT = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.121 ' \
-                     'Safari/537.36 '
+# Ensure all spiders share same duplicates filter through redis.
+DUPEFILTER_CLASS = "scrapy_redis.dupefilter.RFPDupeFilter"
 
-RESERVED_WORD_IN_URL = [
-    'repost',
-    'attgroup',
-    'pages',
-    'comment',
-    'mblog',
-    'attitude',
-    'addFav',
-    'sinaurl',
-    'fav',
-    'account',
-    'msg',
-    'search',
-    'topic',
-    'spam',
-    'at',
-    's',
-]
+# Default requests serializer is pickle, but it can be changed to any module
+# with loads and dumps functions. Note that pickle is not compatible between
+# python versions.
+# Caveat: In python 3.x, the serializer must return strings keys and support
+# bytes as values. Because of this reason the json or msgpack module will not
+# work by default. In python 2.x there is no such issue and you can use
+# 'json' or 'msgpack' as serializers.
+#SCHEDULER_SERIALIZER = "scrapy_redis.picklecompat"
+
+# Don't cleanup redis queues, allows to pause/resume crawls.
+#SCHEDULER_PERSIST = True
+
+# Schedule requests using a priority queue. (default)
+#SCHEDULER_QUEUE_CLASS = 'scrapy_redis.queue.PriorityQueue'
+
+# Alternative queues.
+#SCHEDULER_QUEUE_CLASS = 'scrapy_redis.queue.FifoQueue'
+#SCHEDULER_QUEUE_CLASS = 'scrapy_redis.queue.LifoQueue'
+
+# Max idle time to prevent the spider from being closed when distributed crawling.
+# This only works if queue class is SpiderQueue or SpiderStack,
+# and may also block the same time when your spider start at the first time (because the queue is empty).
+#SCHEDULER_IDLE_BEFORE_CLOSE = 10
+# Store scraped item in redis for post-processing.
+ITEM_PIPELINES = {
+    'scrapy_redis.pipelines.RedisPipeline': 300
+}
+
+# The item pipeline serializes and stores the items in this redis key.
+#REDIS_ITEMS_KEY = '%(spider)s:items'
+
+# The items serializer is by default ScrapyJSONEncoder. You can use any
+# importable path to a callable object.
+#REDIS_ITEMS_SERIALIZER = 'json.dumps'
+
+# Specify the host and port to use when connecting to Redis (optional).
+#REDIS_HOST = 'localhost'
+#REDIS_PORT = 6379
+
+# Specify the full Redis URL for connecting (optional).
+# If set, this takes precedence over the REDIS_HOST and REDIS_PORT settings.
+REDIS_URL = 'redis://:rootroot@127.0.0.1:6379'
+
+# Custom redis client parameters (i.e.: socket timeout, etc.)
+#REDIS_PARAMS  = {}
+# Use custom redis client class.
+#REDIS_PARAMS['redis_cls'] = 'myproject.RedisClient'
+
+# If True, it uses redis' ``spop`` operation. This could be useful if you
+# want to avoid duplicates in your start urls list. In this cases, urls must
+# be added via ``sadd`` command or you will get a type error from redis.
+#REDIS_START_URLS_AS_SET = False
+
+# Default start urls key for RedisSpider and RedisCrawlSpider.
+#REDIS_START_URLS_KEY = '%(name)s:start_urls'
+
+# Use other encoding than utf-8 for redis.
+#REDIS_ENCODING = 'latin1'
+'''

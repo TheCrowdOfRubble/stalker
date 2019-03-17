@@ -12,6 +12,7 @@ class UserItem(scrapy.Item):
     user_id = scrapy.Field()
     nickname = scrapy.Field()
     username = scrapy.Field()
+    avatar = scrapy.Field()
     weibo_amount = scrapy.Field()  # 微博数
     follow_amount = scrapy.Field()  # 关注数
     follower_amount = scrapy.Field()  # 粉丝数
@@ -35,6 +36,7 @@ class WeiboItem(scrapy.Item):
     repost_amount = scrapy.Field()
     comment_amount = scrapy.Field()
     like_amount = scrapy.Field()
+    origin_weibo_id = scrapy.Field()
 
 
 PROFILE_FIELD_CN_TO_EN = {
