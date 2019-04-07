@@ -109,8 +109,6 @@ class StalkerDownloaderMiddleware(object):
 
     def spider_opened(self, spider):
         spider.logger.info('Spider opened: %s' % spider.name)
-'''
-
 
 T = typing.TypeVar('T', bound='RandomUserAgentMiddleware')
 
@@ -132,6 +130,7 @@ class RandomUserAgentMiddleware(object):
             self.proxy2ua[proxy] = self.ua.ramdom
 
         request.headers.setdefault('User-Agent', self.proxy2ua[proxy])
+'''
 
 
 class RandomHttpProxyMiddleware(object):

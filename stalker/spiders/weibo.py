@@ -35,19 +35,14 @@ class WeiboSpider(scrapy.Spider):
     ]
 
     def parse(self, response: scrapy.http.Response) -> type(None):
-        # print(response.url)
-        # yield scrapy.Request(url="https://weibo.cn/repost/HljvrnYse", callback=self.parse_weibo_details)
-        # yield scrapy.Request(url="https://weibo.cn/comment/HljvrnYse", callback=self.parse_weibo_details)
-        # yield scrapy.Request(url="https://weibo.cn/attitude/HljvrnYse", callback=self.parse_weibo_details)
-        # """
-        # 获得个人资料
         print(response.url)
+
+        # 获得个人资料
         yield self.parse_user_page(response)
 
         # 获得个人微博
         for weibo in self.parse_weiboes(response):
-           yield weibo
-        # """
+            yield weibo
 
     def parse_user_page(self, response: scrapy.http.Response):
         user_item = items.UserItem()
@@ -88,11 +83,9 @@ class WeiboSpider(scrapy.Spider):
             weibo_item['create_time'] = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
             weibo_item['modify_time'] = weibo_item['create_time']
             weibo_item["user_id"], weibo_item["username"] = utils.get_id_and_name(response.url)
-            # weibo_item['user_id'] = response.meta['user']['user_id']
-            # weibo_item['username'] = response.meta['user']['username']
             weibo_item['weibo_id'] = weibo.xpath('.//@id').re_first(r"(?<=M_).+")
-            weibo_item['origin_weibo_id'] = weibo.xpath('./*/a[@class="cc"]/@href')\
-                                                 .re(r"(?<=https://weibo.cn/comment/).+(?=\?)", "")
+            weibo_item['origin_weibo_id'] = weibo.xpath('./*/a[@class="cc"]/@href') \
+                .re(r"(?<=https://weibo.cn/comment/).+(?=\?)", "")
 
             additional = weibo.css('.ct::text')
             weibo_item['time'] = additional.re_first(r'.+(?=[\xA0])', '')
@@ -108,9 +101,9 @@ class WeiboSpider(scrapy.Spider):
                 weibo_item['origin_weibo_id'] = ""
                 if weibo.xpath("count(.//div)").get() == '1.0':
                     # 无图原创
-                    weibo_item['content'] = weibo.css('div>div')\
-                                                 .re_first(r'(?<=\<div\>).+(?=\<br\>)', "")\
-                                                 .replace(u"\xA0", u"")
+                    weibo_item['content'] = weibo.css('div>div') \
+                        .re_first(r'(?<=\<div\>).+(?=\<br\>)', "") \
+                        .replace(u"\xA0", u"")
                 else:
                     # 有图原创
                     weibo_item['content'] = weibo.xpath('./div[1]/node()').extract_first('').replace(u"\xA0", u"")
@@ -132,13 +125,13 @@ class WeiboSpider(scrapy.Spider):
         """
         处理微博详情页，用以爬取更多用户
         """
-        page_count = int(response.xpath("//div[@id='pagelist']/form/div/text()[2]").re_first(r'(?<=/).+(?=页)', 1))
+        self.get_more_users(response)  # 处理第一页
 
-        # for page in range(1, min(page_count, 10)):
-        for page in range(1, 2):
+        page_count = int(response.xpath("//div[@id='pagelist']/form/div/text()[2]").re_first(r'(?<=/).+(?=页)', 1))
+        for page in range(2, min(page_count, 3)):  # 从第二页开始
             yield scrapy.Request(url=response.url + "?page=%d" % page, callback=self.get_more_users)
 
     def get_more_users(self, response: scrapy.http.Response):
-        for elem in response.xpath("//div[@class='c'][preceding-sibling::div[@class='pms'] and following-sibling::div[@class='pa']]/a[1][not(contains(@href, '/comment/hot'))]/@href").getall():
-            print("https://weibo.cn" + elem)
+        users = response.xpath("//div[@class='c'][preceding-sibling::div[@class='pms'] and following-sibling::div[@class='pa']]/a[1][not(contains(@href, '/repost/hot') or contains(@href, '/comment/hot'))]/@href").getall()
+        for elem in users:
             yield scrapy.Request(url="https://weibo.cn" + elem)
