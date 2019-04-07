@@ -46,6 +46,7 @@ class WeiboSpider(scrapy.Spider):
 
     def parse_user_page(self, response: scrapy.http.Response):
         user_item = items.UserItem()
+        # TODO: 收集全局变量，以便加速
         user_item['create_time'] = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
         user_item['modify_time'] = user_item['create_time']
 
