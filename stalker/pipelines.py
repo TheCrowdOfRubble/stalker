@@ -7,8 +7,9 @@
 import datetime
 import re
 
-import stalker.items as items
 from twisted.enterprise import adbapi
+
+import stalker.items as items
 
 dbpool = adbapi.ConnectionPool('MySQLdb', host='127.0.0.1', database='The_Crowd_of_Rubble', user='root',
                                password='rootroot', charset='utf8mb4', cp_min=1, cp_max=1, use_unicode=True)
@@ -40,7 +41,7 @@ this_year = datetime.date.today().strftime("%Y-%%s-%%s %%s:%%s:00")
 
 
 def get_time_from_today_pattern(matched):
-    return today % (matched.group(0) ,matched.group(1))
+    return today % (matched.group(0), matched.group(1))
 
 
 def get_time_from_yesterday_pattern(matched):
@@ -71,9 +72,9 @@ for field_name in items.UserItem.fields:
 user_insert_sql = "INSERT INTO `users` (%s) VALUES (%s)" % (keys[:-1], values[:-1])
 
 
-class PersistencePipeline(object):
+class PersistencePipeline():
     def process_item(self, item, spider):
-        if type(item) is items.UserItem:
+        if isinstance(item, items.UserItem):
             self.process_user_item(item)
         else:
             self.process_weibo_item(item)
@@ -86,13 +87,16 @@ class PersistencePipeline(object):
         item['time'] = self.get_time(item['time'])
         exit()
 
-    def insert_user(self, tx, item):
+    @staticmethod
+    def insert_user(tx, item):
         tx.execute(user_insert_sql, tuple(dict(item).values()))  # 业已转义
 
-    def insert_weibo(self, tx, item):
+    @staticmethod
+    def insert_weibo(tx, item):
         tx.execute(weibo_insert_sql, tuple(dict(item).values()))  # 业已转义
 
-    def get_time(self, time):
+    @staticmethod
+    def get_time(time):
         for pattern, function in patterns:
             matched = pattern.match(time)
             if time:
