@@ -5,29 +5,11 @@ import scrapy
 
 import stalker.items as items
 import stalker.utils as utils
-
-RESERVED_WORD_IN_URL = [
-    'repost',
-    'attgroup',
-    'pages',
-    'comment',
-    'mblog',
-    'attitude',
-    'addFav',
-    'sinaurl',
-    'fav',
-    'account',
-    'msg',
-    'search',
-    'topic',
-    'spam',
-    'at',
-    's',
-]
+import stalker.utils.weibo_datetime_parser as weibo_datetime_parser
 
 
 class WeiboSpider(scrapy.Spider):
-    name: str = 'weibo'
+    name = 'weibo'
     allowed_domains = ['weibo.cn']
     start_urls = [
         'https://weibo.cn/rmrb',
@@ -45,9 +27,9 @@ class WeiboSpider(scrapy.Spider):
 
     def parse_user_page(self, response):
         user_item = items.UserItem()
-        # TODO: 收集全局变量，以便加速
-        user_item['create_time'] = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
-        user_item['modify_time'] = user_item['create_time']
+        user_item.set_all()
+
+        user_item['modify_time'] = user_item['create_time'] = utils.get_datetime("%Y-%m-%d %H:%M:%S")
 
         user_item["user_id"], user_item["username"] = utils.get_id_and_name(response.url)
         user_item["avatar"] = response.css(".u img::attr(src)").extract_first("")
@@ -89,7 +71,7 @@ class WeiboSpider(scrapy.Spider):
                 .re(r"(?<=https://weibo.cn/comment/).+(?=\?)", "")
 
             additional = weibo.css('.ct::text')
-            weibo_item['time'] = additional.re_first(r'.+(?=[\xA0])', '')
+            weibo_item['time'] = weibo_datetime_parser.parse(additional.re_first(r'.+(?=[\xA0])', ''))
             weibo_item['platform'] = additional.re_first(r'(?<=来自).+', '')
 
             statistics = weibo.xpath('.//div[last()]/a/text()')

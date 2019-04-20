@@ -8,7 +8,13 @@
 import scrapy
 
 
-class UserItem(scrapy.Item):
+class BaseItem(scrapy.Item):
+    def set_all(self, value=None):
+        for keys, _ in self.fields.items():
+            self[keys] = value
+
+
+class UserItem(BaseItem):
     user_id = scrapy.Field()
     nickname = scrapy.Field()
     username = scrapy.Field()
@@ -29,7 +35,7 @@ class UserItem(scrapy.Item):
     modify_time = scrapy.Field()
 
 
-class WeiboItem(scrapy.Item):
+class WeiboItem(BaseItem):
     weibo_id = scrapy.Field()
     user_id = scrapy.Field()
     username = scrapy.Field()

@@ -1,0 +1,18 @@
+RESERVED_WORD_IN_URL = [
+    'repost',
+    'attgroup',
+    'pages',
+    'comment',
+    'mblog',
+    'attitude',
+    'addFav',
+    'sinaurl',
+    'fav',
+    'account',
+    'msg',
+    'search',
+    'topic',
+    'spam',
+    'at',
+    's',
+]
