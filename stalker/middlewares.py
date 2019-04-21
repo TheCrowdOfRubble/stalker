@@ -11,6 +11,9 @@ import os
 import random
 
 import stalker.utils as utils
+import stalker.utils.useragent as useragent
+import stalker.utils.account as account
+import stalker.settings as settings
 
 
 class RandomHttpProxyMiddleware:
@@ -19,26 +22,31 @@ class RandomHttpProxyMiddleware:
         request.meta['proxy'] = utils.get_random_proxy()
 
 
-class RandomAccountMiddleware:
-    accounts = []
-    proxy2account = {}
-
-    def __init__(self):
-        def reduce_cookie_to_one_line(x1, x2):
-            if "expirationDate" in x1:
-                x1 = {x1["name"]: x1["value"]}
-            x1[x2["name"]] = x2["value"]
-            return x1
-
-        def get_all_accounts(filename):
-            with open(os.getcwd() + "/stalker/accounts/" + filename, "r") as account:
-                jar = json.load(account)
-            return functools.reduce(reduce_cookie_to_one_line, jar)
-
-        self.accounts = list(map(get_all_accounts, os.listdir(os.getcwd() + "/stalker/accounts")))
+class RandomUserAgentMiddleware:
+    proxy2ua = {}
 
     def process_request(self, request, spider):
-        proxy = request.meta.get('proxy')
-        if proxy not in self.proxy2account:
-            self.proxy2account[proxy] = random.choice(self.accounts)
-        request.cookies = self.proxy2account[proxy]
+        proxy = request.meta.get('proxy')  # 没有返回 None
+
+        if proxy is not None:
+            if proxy not in self.proxy2ua:
+                self.proxy2ua[proxy] = useragent.get_random_useragent()  # None 也可当 key
+            request.headers.setdefault('User-Agent', self.proxy2ua[proxy])
+        else:
+            request.headers.setdefault('User-Agent', settings.USER_AGENT)
+
+
+class RandomAccountMiddleware:
+    proxy2account = {}
+
+    def process_request(self, request, spider):
+        proxy = request.meta.get('proxy')  # 没有返回 None
+
+        if proxy is not None:
+            if proxy not in self.proxy2account:
+                self.proxy2account[proxy] = account.get_random_account()  # None 也可当 key
+            request.cookies.update(self.proxy2account[proxy])
+        else:
+            request.cookies.update(account.get_random_account())
+
+        print(request.url, request.meta.get('proxy'), request.cookies)

@@ -30,7 +30,7 @@ ROBOTSTXT_OBEY = False
 DOWNLOAD_DELAY = 1
 # The download delay setting will honor only one of:
 # CONCURRENT_REQUESTS_PER_DOMAIN = 16
-CONCURRENT_REQUESTS_PER_IP = 4
+CONCURRENT_REQUESTS_PER_IP = 8
 
 # Disable cookies (enabled by default)
 # COOKIES_ENABLED = False
@@ -54,13 +54,13 @@ TELNETCONSOLE_ENABLED = False
 # See https://doc.scrapy.org/en/latest/topics/downloader-middleware.html
 DOWNLOADER_MIDDLEWARES = {
     # 'stalker.middlewares.StalkerDownloaderMiddleware': 543,
-    # 'scrapy.downloadermiddlewares.useragent.UserAgentMiddleware': None,
-    # 'scrapy.downloadermiddlewares.httpproxy.HttpProxyMiddleware': None,
+    'scrapy.downloadermiddlewares.useragent.UserAgentMiddleware': None,
+    'scrapy.downloadermiddlewares.httpproxy.HttpProxyMiddleware': None,
     # 'scrapy.downloadermiddlewares.cookies.CookiesMiddleware': None,
 
     # 'stalker.middlewares.RandomHttpProxyMiddleware': 100,
     'stalker.middlewares.RandomAccountMiddleware': 110,
-    # 'stalker.middlewares.RandomUserAgentMiddleware': 120,
+    'stalker.middlewares.RandomUserAgentMiddleware': 120,
     # 'scrapy.extensions.closespider.CloseSpider': 500,
 }
 
@@ -94,7 +94,7 @@ AUTOTHROTTLE_ENABLED = True
 HTTPCACHE_ENABLED = True
 HTTPCACHE_EXPIRATION_SECS = 600
 HTTPCACHE_DIR = '/tmp/'
-HTTPCACHE_IGNORE_HTTP_CODES = [500, 501, 502, 503, 504, 403, 404]
+# HTTPCACHE_IGNORE_HTTP_CODES = [500, 501, 502, 503, 504, 403, 404]
 # HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
 
 # log
@@ -118,8 +118,7 @@ DB_MIN_POOL_SIZE = 1
 DB_MAX_POOL_SIZE = 10
 DB_USE_UNICODE = True
 
-WEIBO_INSERT_SQL = '''
-INSERT INTO `weiboes` (
+WEIBO_INSERT_SQL = '''INSERT INTO `weiboes` (
     `weibo_id`,
     `user_id`,
     `username`,
@@ -148,8 +147,7 @@ INSERT INTO `weiboes` (
 )
 '''
 
-USER_INSERT_SQL = '''
-INSERT INTO `users` (
+USER_INSERT_SQL = '''INSERT INTO `users` (
     `user_id`,
     `nickname`,
     `username`,

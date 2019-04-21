@@ -16,8 +16,6 @@ class WeiboSpider(scrapy.Spider):
     ]
 
     def parse(self, response):
-        print(response.url)
-
         # 获得个人资料
         yield self.parse_user_page(response)
 
@@ -38,7 +36,7 @@ class WeiboSpider(scrapy.Spider):
         user_item["follow_amount"] = int(statistics.re_first(r"(?<=关注\[)\d+(?=\])", 0))
         user_item["follower_amount"] = int(statistics.re_first(r"(?<=粉丝\[)\d+(?=\])", 0))
 
-        profile = response.css(".ut>a:nth-of-type(2)::attr(href)")
+        profile = response.css(".ut>a:nth-of-type(2)::attr(href)")  # 「资料」超链接
         user_item["user_id"] = int(profile.re_first(r"\d+", 0))
 
         # 处理个人资料页

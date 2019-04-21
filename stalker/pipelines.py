@@ -31,6 +31,7 @@ class PersistencePipeline:
         self.user_insert_sql = user_insert_sql
 
     def process_item(self, item, spider):
+        return
         if isinstance(item, items.UserItem):
             self._process_user_item(item)
         else:
