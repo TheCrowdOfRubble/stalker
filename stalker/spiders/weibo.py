@@ -69,7 +69,7 @@ class WeiboSpider(scrapy.Spider):
                 .re(r"(?<=https://weibo.cn/comment/).+(?=\?)", "")
 
             additional = weibo.css('.ct::text')
-            weibo_item['time'] = weibo_datetime_parser.parse(additional.re_first(r'.+(?=[\xA0])', ''))
+            weibo_item['time'] = weibo_datetime_parser.parse(additional.re_first(r'.+(?=[\xA0])', utils.get_datetime()))
             weibo_item['platform'] = additional.re_first(r'(?<=来自).+', '')
 
             statistics = weibo.xpath('.//div[last()]/a/text()')
@@ -95,12 +95,21 @@ class WeiboSpider(scrapy.Spider):
 
             yield weibo_item
 
-            yield scrapy.Request(url="https://weibo.cn/repost/" + weibo_item['weibo_id'],
-                                 callback=self.parse_weibo_details)
-            yield scrapy.Request(url="https://weibo.cn/comment/" + weibo_item['weibo_id'],
-                                 callback=self.parse_weibo_details)
-            yield scrapy.Request(url="https://weibo.cn/attitude/" + weibo_item['weibo_id'],
-                                 callback=self.parse_weibo_details)
+            yield scrapy.Request(
+                url="https://weibo.cn/repost/" + weibo_item['weibo_id'],
+                callback=self.parse_weibo_details,
+                meta={'random': True}
+            )
+            yield scrapy.Request(
+                url="https://weibo.cn/comment/" + weibo_item['weibo_id'],
+                callback=self.parse_weibo_details,
+                meta={'random': True}
+            )
+            yield scrapy.Request(
+                url="https://weibo.cn/attitude/" + weibo_item['weibo_id'],
+                callback=self.parse_weibo_details,
+                meta={'random': True}
+            )
 
     def parse_weibo_details(self, response):
         """

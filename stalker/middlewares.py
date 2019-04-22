@@ -4,49 +4,61 @@
 #
 # See documentation in:
 # https://doc.scrapy.org/en/latest/topics/spider-middleware.html
-
-import functools
-import json
-import os
-import random
-
 import stalker.utils as utils
 import stalker.utils.useragent as useragent
 import stalker.utils.account as account
 import stalker.settings as settings
 
 
-class RandomHttpProxyMiddleware:
+class RandomAccountMiddleware:
     @staticmethod
     def process_request(request, spider):
-        request.meta['proxy'] = utils.get_random_proxy()
+        if request.meta.get('random'):  # random 模式，不设 account，随机 ua，随机 proxy
+            return
+
+        account_name, account_dict = account.get_random_account()
+        request.meta['account_name'] = account_name
+        request.cookies.update(account_dict)
+
+
+class RandomHttpProxyMiddleware:
+    account_name2proxy = {}
+
+    def process_request(self, request, spider):
+        if request.meta.get('random'):  # random 模式，不设 account，随机 ua，随机 proxy
+            request.meta['proxy'] = utils.get_random_proxy()
+            return
+        '''
+        account_name = request.meta.get('account_name')
+        if account_name not in self.account_name2proxy:  # 之前没遇到过的 account
+            self.account_name2proxy[account_name] = utils.get_random_proxy()
+
+        request.meta['proxy'] = self.account_name2proxy[account_name]
+        '''
 
 
 class RandomUserAgentMiddleware:
-    proxy2ua = {}
+    account_name2ua = {}
 
     def process_request(self, request, spider):
-        proxy = request.meta.get('proxy')  # 没有返回 None
+        if request.meta.get('random'):  # random 模式，不设 account，随机 ua，随机 proxy
+            request.headers.setdefault('User-Agent', useragent.get_random_useragent())
+            return
 
-        if proxy is not None:
-            if proxy not in self.proxy2ua:
-                self.proxy2ua[proxy] = useragent.get_random_useragent()  # None 也可当 key
-            request.headers.setdefault('User-Agent', self.proxy2ua[proxy])
-        else:
-            request.headers.setdefault('User-Agent', settings.USER_AGENT)
+        account_name = request.meta.get('account_name')
+        if account_name not in self.account_name2ua:  # 之前没遇到过的 account
+            self.account_name2ua[account_name] = useragent.get_random_useragent()
+
+        request.headers.setdefault('User-Agent', self.account_name2ua[account_name])
 
 
-class RandomAccountMiddleware:
-    proxy2account = {}
+class HTTPLoggerMiddleware:
+    @staticmethod
+    def process_request(request, spider):
+        print(request.url, request.meta.get('proxy'), request.meta.get('account_name'), request.headers['User-Agent'])
 
-    def process_request(self, request, spider):
-        proxy = request.meta.get('proxy')  # 没有返回 None
-
-        if proxy is not None:
-            if proxy not in self.proxy2account:
-                self.proxy2account[proxy] = account.get_random_account()  # None 也可当 key
-            request.cookies.update(self.proxy2account[proxy])
-        else:
-            request.cookies.update(account.get_random_account())
-
-        print(request.url, request.meta.get('proxy'), request.cookies)
+    @staticmethod
+    def process_response(response, spider):
+        if response.status in [200, 301, 302]:
+            return
+        utils.perror("BAD RESPONSE", response.status, response.url)

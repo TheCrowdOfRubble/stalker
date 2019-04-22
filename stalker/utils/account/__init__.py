@@ -7,7 +7,8 @@ import random
 # /run/media/baronhou/Data/Projects/python/a_crowd_of_rubble/stalker/stalker/utils/useragent
 _BASE_PATH = os.path.dirname(os.path.realpath(__file__))
 
-_accounts = []
+_accounts = {}
+_account_names = []
 
 
 def _reduce_cookie_to_one_line(x1, x2):
@@ -20,11 +21,14 @@ def _reduce_cookie_to_one_line(x1, x2):
 for account_file_name in glob.glob(os.path.join(_BASE_PATH, 'accounts', '*.json')):
     with open(account_file_name) as f:
         cookie = functools.reduce(_reduce_cookie_to_one_line, json.load(f))
-        _accounts.append(cookie)
+        _accounts[account_file_name] = cookie
+
+_account_names = list(_accounts.keys())
 
 
 def get_random_account():
-    return random.choice(_accounts)
+    random_key = random.choice(_account_names)
+    return random_key, _accounts[random_key]
 
 
 print("账号加载完毕，共加载账号", len(_accounts), "个")

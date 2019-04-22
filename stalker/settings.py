@@ -15,8 +15,7 @@ SPIDER_MODULES = ['stalker.spiders']
 NEWSPIDER_MODULE = 'stalker.spiders'
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
-USER_AGENT = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.121 ' \
-             'Safari/537.36 '
+USER_AGENT = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.86 Safari/537.36'
 
 # Obey robots.txt rules
 ROBOTSTXT_OBEY = False
@@ -58,10 +57,12 @@ DOWNLOADER_MIDDLEWARES = {
     'scrapy.downloadermiddlewares.httpproxy.HttpProxyMiddleware': None,
     # 'scrapy.downloadermiddlewares.cookies.CookiesMiddleware': None,
 
-    # 'stalker.middlewares.RandomHttpProxyMiddleware': 100,
-    'stalker.middlewares.RandomAccountMiddleware': 110,
+    'stalker.middlewares.RandomAccountMiddleware': 100,
+    'stalker.middlewares.RandomHttpProxyMiddleware': 110,
     'stalker.middlewares.RandomUserAgentMiddleware': 120,
     # 'scrapy.extensions.closespider.CloseSpider': 500,
+
+    'stalker.middlewares.HTTPLoggerMiddleware': 999,
 }
 
 # Enable or disable extensions
@@ -101,7 +102,7 @@ HTTPCACHE_DIR = '/tmp/'
 # LOG_ENABLED = False
 LOG_LEVEL = 'WARNING'
 
-DEPTH_LIMIT = 1
+DEPTH_LIMIT = 16
 
 # DEPTH_PRIORITY = -1
 
@@ -114,8 +115,8 @@ DB_PORT = 3306
 DB_USER = 'root'
 DB_PASSWORD = 'rootroot'
 DB_CHARSET = 'utf8mb4'
-DB_MIN_POOL_SIZE = 1
-DB_MAX_POOL_SIZE = 10
+DB_MIN_POOL_SIZE = 10
+DB_MAX_POOL_SIZE = 100
 DB_USE_UNICODE = True
 
 WEIBO_INSERT_SQL = '''INSERT INTO `weiboes` (

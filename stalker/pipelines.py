@@ -7,6 +7,7 @@
 from twisted.enterprise import adbapi
 
 import stalker.items as items
+import stalker.utils as utils
 
 
 class PersistencePipeline:
@@ -31,7 +32,6 @@ class PersistencePipeline:
         self.user_insert_sql = user_insert_sql
 
     def process_item(self, item, spider):
-        return
         if isinstance(item, items.UserItem):
             self._process_user_item(item)
         else:
@@ -57,7 +57,7 @@ class PersistencePipeline:
             user_item["relationship_status"],
             user_item["create_time"],
             user_item["modify_time"],
-        ))
+        )).addErrback(self._error_handler, user_item)
 
     def _process_weibo_item(self, weibo_item):
         self.db_pool.runInteraction(self._insert_item(self.weibo_insert_sql), (
@@ -73,10 +73,14 @@ class PersistencePipeline:
             weibo_item["platform"],
             weibo_item["create_time"],
             weibo_item["modify_time"],
-        ))
+        )).addErrback(self._error_handler, weibo_item)
 
     @staticmethod
     def _insert_item(raw_sql):
         def insert(cursor, item):
             cursor.execute(raw_sql, item)
         return insert
+
+    @staticmethod
+    def _error_handler(failure, item):
+        utils.perror("ERROR IN INSERT", item)

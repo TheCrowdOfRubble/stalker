@@ -1,6 +1,8 @@
 import datetime
 import re
 
+import stalker.utils as utils
+
 _today = datetime.date.today().strftime("%Y-%m-%d %%s:%%s:00")
 _yesterday = (datetime.date.today() - datetime.timedelta(days=1)).strftime("%Y-%m-%d %%s:%%s:00")
 _this_year = datetime.date.today().strftime("%Y-%%s-%%s %%s:%%s:00")
@@ -10,6 +12,7 @@ _minute_pattern = re.compile(r'\d+(?=分钟前)')
 _today_pattern = re.compile(r'今天 (\d+):(\d+)')
 _yesterday_pattern = re.compile(r'昨天 (\d+):(\d+)')
 _year_pattern = re.compile(r'(\d+)月(\d+)日 (\d+):(\d+)')
+_full_pattern = re.compile(r'(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2})')
 
 
 def _get_time_from_second_pattern(matched):
@@ -38,12 +41,17 @@ def _get_time_from_year_pattern(matched):
     return _this_year % (matched.group(1), matched.group(2), matched.group(3), matched.group(4))
 
 
+def _get_time_from_full_pattern(matched):
+    return "%s-%s-%s %s:%s:%s" % (matched.group(1), matched.group(2), matched.group(3), matched.group(4), matched.group(5), matched.group(6))
+
+
 _patterns = {
     _second_pattern: _get_time_from_second_pattern,
     _minute_pattern: _get_time_from_minute_pattern,
     _today_pattern: _get_time_from_today_pattern,
     _yesterday_pattern: _get_time_from_yesterday_pattern,
     _year_pattern: _get_time_from_year_pattern,
+    _full_pattern: _get_time_from_full_pattern,
 }
 
 
@@ -52,4 +60,5 @@ def parse(raw_datetime_string):
         matched = pattern.match(raw_datetime_string)
         if matched:
             return _patterns[pattern](matched)
-    return raw_datetime_string
+    utils.perror("WRONG WEIBO DATE", raw_datetime_string)
+    return "0000-00-00 00:00:00"
