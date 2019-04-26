@@ -15,21 +15,21 @@ SPIDER_MODULES = ['stalker.spiders']
 NEWSPIDER_MODULE = 'stalker.spiders'
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
-USER_AGENT = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.86 Safari/537.36'
+USER_AGENT = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.103 Safari/537.36'
 
 # Obey robots.txt rules
 ROBOTSTXT_OBEY = False
 
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
-# CONCURRENT_REQUESTS = 32
+CONCURRENT_REQUESTS = 128
 
 # Configure a delay for requests for the same website (default: 0)
 # See https://doc.scrapy.org/en/latest/topics/settings.html#download-delay
 # See also autothrottle settings and docs
-DOWNLOAD_DELAY = 1
+DOWNLOAD_DELAY = 0.1
 # The download delay setting will honor only one of:
-# CONCURRENT_REQUESTS_PER_DOMAIN = 16
-CONCURRENT_REQUESTS_PER_IP = 8
+CONCURRENT_REQUESTS_PER_DOMAIN = 64
+CONCURRENT_REQUESTS_PER_IP = 64
 
 # Disable cookies (enabled by default)
 # COOKIES_ENABLED = False
@@ -57,6 +57,7 @@ DOWNLOADER_MIDDLEWARES = {
     'scrapy.downloadermiddlewares.httpproxy.HttpProxyMiddleware': None,
     # 'scrapy.downloadermiddlewares.cookies.CookiesMiddleware': None,
 
+    'stalker.middlewares.BadResponseDropperMiddleware': 50,
     'stalker.middlewares.RandomAccountMiddleware': 100,
     'stalker.middlewares.RandomHttpProxyMiddleware': 110,
     'stalker.middlewares.RandomUserAgentMiddleware': 120,
@@ -81,14 +82,14 @@ ITEM_PIPELINES = {
 # See https://doc.scrapy.org/en/latest/topics/autothrottle.html
 AUTOTHROTTLE_ENABLED = True
 # The initial download delay
-# AUTOTHROTTLE_START_DELAY = 5
+AUTOTHROTTLE_START_DELAY = 1
 # The maximum download delay to be set in case of high latencies
-# AUTOTHROTTLE_MAX_DELAY = 60
+AUTOTHROTTLE_MAX_DELAY = 10
 # The average number of requests Scrapy should be sending in parallel to
 # each remote server
-# AUTOTHROTTLE_TARGET_CONCURRENCY = 1.0
+AUTOTHROTTLE_TARGET_CONCURRENCY = 64
 # Enable showing throttling stats for every response received:
-# AUTOTHROTTLE_DEBUG = False
+# AUTOTHROTTLE_DEBUG = True
 
 # Enable and configure HTTP caching (disabled by default)
 # See https://doc.scrapy.org/en/latest/topics/downloader-middleware.html#httpcache-middleware-settings
@@ -100,91 +101,180 @@ HTTPCACHE_DIR = '/tmp/'
 
 # log
 # LOG_ENABLED = False
-LOG_LEVEL = 'WARNING'
+LOG_LEVEL = 'INFO'
 
-DEPTH_LIMIT = 16
+# DEPTH_LIMIT = 1
 
 # DEPTH_PRIORITY = -1
 
 # CLOSESPIDER_PAGECOUNT = 1000
 
+# Retry when proxies fail
+RETRY_TIMES = 3
+
+# Retry on most error codes since proxies fail for different reasons
+RETRY_HTTP_CODES = [500, 503, 504, 400, 403, 404, 408, 418]
+
+IGNORE_URLS = [
+    'https://passport.weibo.cn',
+    'https://login.sina.com.cn',
+]
+
+START_URLS = [
+    'https://weibo.cn/mhkb',
+    'https://weibo.cn/paingod',
+    'https://weibo.cn/haogaoxinging',
+    'https://weibo.cn/u/1852376135',
+    'https://weibo.cn/u/2213526752',
+    'https://weibo.cn/u/5979629331',
+    'https://weibo.cn/u/6049590367',
+    'https://weibo.cn/guozixiaoxin',
+    'https://weibo.cn/LusterRedhellsong',
+    'https://weibo.cn/u/5874715391',
+    'https://weibo.cn/sc868448',
+    'https://weibo.cn/u/6432721600',
+    'https://weibo.cn/u/2150511032',
+    'https://weibo.cn/u/2589055334',
+    'https://weibo.cn/575223374',
+    'https://weibo.cn/272309900',
+    'https://weibo.cn/ichthy',
+    'https://weibo.cn/u/5108265142',
+    'https://weibo.cn/maboyong',
+    'https://weibo.cn/u/5992829552',
+    'https://weibo.cn/kfcchina',
+    'https://weibo.cn/echohall',
+    'https://weibo.cn/u/2259906485',
+    'https://weibo.cn/u/2989645311',
+    'https://weibo.cn/appinncom',
+    'https://weibo.cn/guokr42',
+    'https://weibo.cn/u/6064752668',
+    'https://weibo.cn/u/2253203771',
+    'https://weibo.cn/u/5079708263',
+    'https://weibo.cn/u/1826792401',
+    'https://weibo.cn/u/6405349029',
+    'https://weibo.cn/u/7073308386',
+    'https://weibo.cn/u/1863847262',
+]
+
+# 每个人的历史微博与微博评论最多翻几页
+MAX_PAGE_VISIT = 5
+
 DB_DRIVER = 'MySQLdb'
-DB_NAME = 'The_Crowd_of_Rubble'
+DB_NAME = 'weibo'
 DB_HOST = '127.0.0.1'
 DB_PORT = 3306
 DB_USER = 'root'
 DB_PASSWORD = 'rootroot'
 DB_CHARSET = 'utf8mb4'
-DB_MIN_POOL_SIZE = 10
-DB_MAX_POOL_SIZE = 100
+DB_MIN_POOL_SIZE = 50
+DB_MAX_POOL_SIZE = 300
 DB_USE_UNICODE = True
 
-WEIBO_INSERT_SQL = '''INSERT INTO `weiboes` (
-    `weibo_id`,
-    `user_id`,
-    `username`,
-    `time`,
-    `content`,
-    `repost_amount`,
-    `comment_amount`,
-    `like_amount`,
-    `origin_weibo_id`,
-    `platform`,
-    `create_time`,
-    `modify_time`
-) VALUES (
-    %s,
-    %s,
-    %s,
-    %s,
-    %s,
-    %s,
-    %s,
-    %s,
-    %s,
-    %s,
-    %s,
-    %s
+WEIBO_INSERT_SQL = (
+    'INSERT INTO `weiboes` ('
+        '`weibo_id`,'
+        '`user_id`,'
+        '`time`,'
+        '`content`,'
+        '`repost_amount`,'
+        '`comment_amount`,'
+        '`like_amount`,'
+        '`origin_weibo_id`,'
+        '`platform`,'
+        '`create_time`,'
+        '`modify_time`'
+    ') VALUES ('
+        '%s,'
+        '%s,'
+        '%s,'
+        '%s,'
+        '%s,'
+        '%s,'
+        '%s,'
+        '%s,'
+        '%s,'
+        'now(),'
+        'now()'
+    ')'
 )
-'''
 
-USER_INSERT_SQL = '''INSERT INTO `users` (
-    `user_id`,
-    `nickname`,
-    `username`,
-    `avatar`,
-    `weibo_amount`,
-    `follow_amount`,
-    `follower_amount`,
-    `gender`,
-    `introduction`,
-    `birthday`,
-    `certification`,
-    `certification_information`,
-    `location`,
-    `weibo_expert`,
-    `sexual_orientation`,
-    `relationship_status`,
-    `create_time`,
-    `modify_time`
-) VALUES (
-    %s,
-    %s,
-    %s,
-    %s,
-    %s,
-    %s,
-    %s,
-    %s,
-    %s,
-    %s,
-    %s,
-    %s,
-    %s,
-    %s,
-    %s,
-    %s,
-    %s,
-    %s
+WEIBO_UPDATE_SQL = (
+    'UPDATE `weiboes`'
+    ' SET '
+        '`user_id` = %s,'
+        '`time` = %s,'
+        '`content` = %s,'
+        '`repost_amount` = %s,'
+        '`comment_amount` = %s,'
+        '`like_amount` = %s,'
+        '`origin_weibo_id` = %s,'
+        '`platform` = %s,'
+        '`modify_time` = now()'
+    ' WHERE '
+        '`weibo_id` = %s'
 )
-'''
+
+USER_INSERT_SQL = (
+    'INSERT INTO `users` ('
+       '`user_id`,'
+       '`nickname`,'
+       '`username`,'
+       '`avatar`,'
+       '`weibo_amount`,'
+       '`follow_amount`,'
+       '`follower_amount`,'
+       '`gender`,'
+       '`introduction`,'
+       '`birthday`,'
+       '`certification`,'
+       '`certification_information`,'
+       '`location`,'
+       '`weibo_expert`,'
+       '`sexual_orientation`,'
+       '`relationship_status`,'
+       '`create_time`,'
+       '`modify_time`'
+    ') VALUES ('
+       '%s,'
+       '%s,'
+       '%s,'
+       '%s,'
+       '%s,'
+       '%s,'
+       '%s,'
+       '%s,'
+       '%s,'
+       '%s,'
+       '%s,'
+       '%s,'
+       '%s,'
+       '%s,'
+       '%s,'
+       '%s,'
+       'now(),'
+       'now()'
+    ')'
+)
+
+USER_UPDATE_SQL = (
+    'UPDATE `users`'
+    ' SET '
+        '`nickname` = %s,'
+        '`username` = %s,'
+        '`avatar` = %s,'
+        '`weibo_amount` = %s,'
+        '`follow_amount` = %s,'
+        '`follower_amount` = %s,'
+        '`gender` = %s,'
+        '`introduction` = %s,'
+        '`birthday` = %s,'
+        '`certification` = %s,'
+        '`certification_information` = %s,'
+        '`location` = %s,'
+        '`weibo_expert` = %s,'
+        '`sexual_orientation` = %s,'
+        '`relationship_status` = %s,'
+        '`modify_time` = now()'
+    ' WHERE '
+        '`user_id` = %s'
+)

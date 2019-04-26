@@ -1,6 +1,7 @@
 import os
 import glob
 import random
+import logging
 
 # /run/media/baronhou/Data/Projects/python/a_crowd_of_rubble/stalker/stalker/utils/useragent
 _BASE_PATH = os.path.dirname(os.path.realpath(__file__))
@@ -20,4 +21,4 @@ def get_random_useragent():
     return random.choice(_user_agents)
 
 
-print("UA加载完毕，共加载UA", len(_user_agents), "个")
+logging.info("UA加载完毕，共加载UA %d 个" % len(_user_agents))

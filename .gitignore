@@ -250,6 +250,7 @@ pip-selfcheck.json
 # Accounts
 /stalker/utils/account/accounts/*.json
 /stalker/utils/account/accounts/*.bak
+/stalker/utils/account/accounts.json
 
 # Export
 *.csv

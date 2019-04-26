@@ -4,6 +4,11 @@
 #
 # See documentation in:
 # https://doc.scrapy.org/en/latest/topics/spider-middleware.html
+import logging
+
+import scrapy
+import scrapy.exceptions
+
 import stalker.utils as utils
 import stalker.utils.useragent as useragent
 import stalker.utils.account as account
@@ -47,7 +52,8 @@ class RandomUserAgentMiddleware:
 
         account_name = request.meta.get('account_name')
         if account_name not in self.account_name2ua:  # 之前没遇到过的 account
-            self.account_name2ua[account_name] = useragent.get_random_useragent()
+            # self.account_name2ua[account_name] = useragent.get_random_useragent()
+            self.account_name2ua[account_name] = settings.USER_AGENT
 
         request.headers.setdefault('User-Agent', self.account_name2ua[account_name])
 
@@ -55,10 +61,29 @@ class RandomUserAgentMiddleware:
 class HTTPLoggerMiddleware:
     @staticmethod
     def process_request(request, spider):
-        print(request.url, request.meta.get('proxy'), request.meta.get('account_name'), request.headers['User-Agent'])
+        logging.warning("%s %s %s %s" % (
+            request.url,
+            request.meta.get('proxy'),
+            request.meta.get('account_name'),
+            request.headers['User-Agent']
+        ))
 
     @staticmethod
-    def process_response(response, spider):
-        if response.status in [200, 301, 302]:
-            return
-        utils.perror("BAD RESPONSE", response.status, response.url)
+    def process_response(request, response, spider):
+        if response.status not in [200, 301, 302]:
+            logging.error("BAD RESPONSE %s %s" % (response.status, request.url))
+        return response
+
+
+class BadResponseDropperMiddleware:
+    @staticmethod
+    def process_request(request: scrapy.http.Request, spider: scrapy.spiders.spiders) -> type(None):
+        for ignore_url in settings.IGNORE_URLS:
+            if not request.url.startswith(ignore_url):
+                continue
+
+            account_name = request.meta.get('account_name')
+            if account_name:
+                logging.error('ACCOUNT %s FAILED IN %s', account_name, request.url)
+                account.remove_account(account_name)
+            raise scrapy.exceptions.IgnoreRequest('IGNORE %s' % request.url)

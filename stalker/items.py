@@ -9,8 +9,8 @@ import scrapy
 
 
 class BaseItem(scrapy.Item):
-    def set_all(self, value=None):
-        for keys, _ in self.fields.items():
+    def set_all(self, value: str = ""):
+        for keys in self.fields:
             self[keys] = value
 
 
@@ -31,14 +31,13 @@ class UserItem(BaseItem):
     weibo_expert = scrapy.Field()  # 微博达人
     sexual_orientation = scrapy.Field()
     relationship_status = scrapy.Field()  # 感情状况
-    create_time = scrapy.Field()
-    modify_time = scrapy.Field()
+    # create_time = scrapy.Field()
+    # modify_time = scrapy.Field()
 
 
 class WeiboItem(BaseItem):
     weibo_id = scrapy.Field()
     user_id = scrapy.Field()
-    username = scrapy.Field()
     time = scrapy.Field()
     content = scrapy.Field()
     repost_amount = scrapy.Field()
@@ -46,8 +45,8 @@ class WeiboItem(BaseItem):
     like_amount = scrapy.Field()
     origin_weibo_id = scrapy.Field()
     platform = scrapy.Field()
-    create_time = scrapy.Field()
-    modify_time = scrapy.Field()
+    # create_time = scrapy.Field()
+    # modify_time = scrapy.Field()
 
 
 PROFILE_FIELD_CN_TO_EN = {
