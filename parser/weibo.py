@@ -3,9 +3,9 @@ import urllib.parse
 import scrapy
 
 import stalker.items as items
-import stalker.utils as utils
-import stalker.parser.time as time_parser
-import stalker.parser.page_count as page_count_parser
+import utils as utils
+import parser.time as time_parser
+import parser.utils.page_count as page_count_parser
 import stalker.settings as settings
 
 

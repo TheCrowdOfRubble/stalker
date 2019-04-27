@@ -1,7 +1,7 @@
 import datetime
 import re
 
-import stalker.utils as utils
+import utils as utils
 
 _today = datetime.date.today().strftime("%Y-%m-%d %%s:%%s:00")
 _yesterday = (datetime.date.today() - datetime.timedelta(days=1)).strftime("%Y-%m-%d %%s:%%s:00")

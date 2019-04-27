@@ -9,9 +9,9 @@ import logging
 import scrapy
 import scrapy.exceptions
 
-import stalker.utils as utils
-import stalker.utils.useragent as useragent
-import stalker.utils.account as account
+import utils as utils
+import utils.useragent as useragent
+import utils.account as account
 import stalker.settings as settings
 
 
@@ -52,8 +52,7 @@ class RandomUserAgentMiddleware:
 
         account_name = request.meta.get('account_name')
         if account_name not in self.account_name2ua:  # 之前没遇到过的 account
-            # self.account_name2ua[account_name] = useragent.get_random_useragent()
-            self.account_name2ua[account_name] = settings.USER_AGENT
+            self.account_name2ua[account_name] = useragent.get_random_useragent()
 
         request.headers.setdefault('User-Agent', self.account_name2ua[account_name])
 
