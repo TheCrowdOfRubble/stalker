@@ -3,10 +3,10 @@ import urllib.parse
 import scrapy
 
 import stalker.items as items
-import utils as utils
-import parser.time as time_parser
-import parser.utils.page_count as page_count_parser
 import stalker.settings as settings
+import utils
+import parser.utils.time as time_parser
+import parser.utils.page_count as page_count_parser
 
 
 def parse(response: scrapy.http.Response, user_item: dict):

@@ -9,7 +9,7 @@ import logging
 import scrapy
 import scrapy.exceptions
 
-import utils as utils
+import utils
 import utils.useragent as useragent
 import utils.account as account
 import stalker.settings as settings
