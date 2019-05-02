@@ -16,7 +16,7 @@ class ZhuangdingSpider(scrapy.Spider):
     allowed_domains = ['weibo.cn']
     start_urls = [
         # 'https://weibo.cn/u/1266321801',
-        'https://weibo.cn/rmrb?f=search_0',
+        'https://weibo.cn/u/2803301701?f=search_0',
     ]
 
     def parse(self, response: scrapy.http.Response):
@@ -40,7 +40,7 @@ class ZhuangdingSpider(scrapy.Spider):
         )
 
         response.meta['user_item'] = user_item
-        response.meta['min_time'] = utils.get_datetime("%Y-%m-01 00:00:00")
+        response.meta['min_time'] = utils.get_datetime("%Y-%m-%d %H:00:00")
         for weibo_item in self.parse_weiboes(response):
             yield weibo_item
 
@@ -67,7 +67,7 @@ class ZhuangdingSpider(scrapy.Spider):
         user_item = response.meta.get('user_item')
         min_time = response.meta.get('min_time')
 
-        beyond = True if not min_time else False  # 未设置 oldest_weibo_datetime 字段就直接设为 True
+        beyond = not bool(min_time)  # 未设置 oldest_weibo_datetime 字段就直接设为 True
         for weibo in response.xpath('//div[@class="c"][contains(@id, "M_")]'):
             weibo_loader = items.WeiboLoader(selector=weibo)
 

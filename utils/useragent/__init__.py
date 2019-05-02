@@ -21,4 +21,4 @@ def get_random_useragent():
     return random.choice(_user_agents)
 
 
-logging.info("UA加载完毕，共加载UA %d 个" % len(_user_agents))
+logging.info("UA加载完毕，共加载UA %d 个", len(_user_agents))

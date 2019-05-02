@@ -36,7 +36,7 @@ class PersistencePipeline:
         elif isinstance(item, items.WeiboItem):
             self._process_weibo_item(item)
         else:
-            logging.critical("GET WRONG ITEM %s" % item)
+            logging.critical("GET WRONG ITEM %s", item)
 
     def _process_user_item(self, user_item):
         self.db_pool.runInteraction(self._exec_sql(settings.USER_INSERT_SQL), (
@@ -117,4 +117,4 @@ class PersistencePipeline:
 
     @staticmethod
     def _error_handler(failure, item):
-        logging.warning("ERROR IN UPDATE %s" % item)
+        logging.warning("ERROR IN UPDATE %s", item)

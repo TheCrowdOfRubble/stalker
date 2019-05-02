@@ -101,8 +101,7 @@ HTTPCACHE_DIR = '/tmp/'
 
 # log
 # LOG_ENABLED = False
-# LOG_LEVEL = 'INFO'
-LOG_LEVEL = 'WARNING'
+LOG_LEVEL = 'INFO'
 
 # DEPTH_LIMIT = 1
 

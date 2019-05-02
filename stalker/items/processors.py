@@ -82,7 +82,7 @@ def get_username_from_user_detail_page_url(text: str):
 
     url_path_slice = url_detail.path.split('/', 2)
     if len(url_path_slice) < 2:
-        logging.error('GET USERNAME FROM URL FAILED: %s' % text)
+        logging.error('GET USERNAME FROM URL FAILED: %s', text)
         return None
     return url_path_slice[1]
 
@@ -152,7 +152,7 @@ class _WeiboTimeParser:
             if matched:
                 return self._patterns[pattern](self, matched)
 
-        logging.error("WRONG WEIBO DATE", raw_datetime_string)
+        logging.error("WRONG WEIBO DATE %s", raw_datetime_string)
         return "0000-00-00 00:00:00"
 
 
@@ -194,7 +194,3 @@ class _WeiboContentParser:
 
 
 get_weibo_content = _WeiboContentParser()
-
-
-def take_last(l: list):
-    return l[-1]
