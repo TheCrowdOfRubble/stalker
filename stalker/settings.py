@@ -94,14 +94,15 @@ AUTOTHROTTLE_TARGET_CONCURRENCY = 64
 # Enable and configure HTTP caching (disabled by default)
 # See https://doc.scrapy.org/en/latest/topics/downloader-middleware.html#httpcache-middleware-settings
 HTTPCACHE_ENABLED = True
-HTTPCACHE_EXPIRATION_SECS = 600
+HTTPCACHE_EXPIRATION_SECS = 3600
 HTTPCACHE_DIR = '/tmp/'
 # HTTPCACHE_IGNORE_HTTP_CODES = [500, 501, 502, 503, 504, 403, 404]
 # HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
 
 # log
 # LOG_ENABLED = False
-LOG_LEVEL = 'INFO'
+# LOG_LEVEL = 'INFO'
+LOG_LEVEL = 'WARNING'
 
 # DEPTH_LIMIT = 1
 
@@ -118,42 +119,6 @@ RETRY_HTTP_CODES = [500, 503, 504, 400, 403, 404, 408, 418]
 IGNORE_URLS = [
     'https://passport.weibo.cn',
     'https://login.sina.com.cn',
-]
-
-START_URLS = [
-    'https://weibo.cn/mhkb',
-    'https://weibo.cn/paingod',
-    'https://weibo.cn/haogaoxinging',
-    'https://weibo.cn/u/1852376135',
-    'https://weibo.cn/u/2213526752',
-    'https://weibo.cn/u/5979629331',
-    'https://weibo.cn/u/6049590367',
-    'https://weibo.cn/guozixiaoxin',
-    'https://weibo.cn/LusterRedhellsong',
-    'https://weibo.cn/u/5874715391',
-    'https://weibo.cn/sc868448',
-    'https://weibo.cn/u/6432721600',
-    'https://weibo.cn/u/2150511032',
-    'https://weibo.cn/u/2589055334',
-    'https://weibo.cn/575223374',
-    'https://weibo.cn/272309900',
-    'https://weibo.cn/ichthy',
-    'https://weibo.cn/u/5108265142',
-    'https://weibo.cn/maboyong',
-    'https://weibo.cn/u/5992829552',
-    'https://weibo.cn/kfcchina',
-    'https://weibo.cn/echohall',
-    'https://weibo.cn/u/2259906485',
-    'https://weibo.cn/u/2989645311',
-    'https://weibo.cn/appinncom',
-    'https://weibo.cn/guokr42',
-    'https://weibo.cn/u/6064752668',
-    'https://weibo.cn/u/2253203771',
-    'https://weibo.cn/u/5079708263',
-    'https://weibo.cn/u/1826792401',
-    'https://weibo.cn/u/6405349029',
-    'https://weibo.cn/u/7073308386',
-    'https://weibo.cn/u/1863847262',
 ]
 
 # 每个人的历史微博与微博评论最多翻几页
