@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import typing
 import urllib.parse as urlparser
+import logging
 
 import scrapy
 from scrapy.loader.processors import MapCompose, TakeFirst, Compose, SelectJmes
@@ -23,6 +24,9 @@ class ZhuangdingSpider(scrapy.Spider):
         user_loader = items.UserLoader(response=response)
 
         user_profile_url = user_loader.get_css('a[href$="/info"]::attr(href)', TakeFirst())
+        if not user_profile_url:
+            logging.info('NO USER %s', response.url)
+            return
 
         user_loader.add_value('user_id', user_profile_url)
         user_loader.add_xpath('weibo_amount', '//div[@class="tip2"]/span/text()')
