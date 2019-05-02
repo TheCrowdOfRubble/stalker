@@ -17,14 +17,15 @@ class ZhuangdingSpider(scrapy.Spider):
     allowed_domains = ['weibo.cn']
     start_urls = [
         # 'https://weibo.cn/u/1266321801',
-        'https://weibo.cn/u/2803301701?f=search_0',
+        # 'https://weibo.cn/u/2803301701?f=search_0',
+        'https://weibo.cn/u/2803301711'
     ]
 
     def parse(self, response: scrapy.http.Response):
         user_loader = items.UserLoader(response=response)
 
         user_profile_url = user_loader.get_css('a[href$="/info"]::attr(href)', TakeFirst())
-        if not user_profile_url:
+        if not user_profile_url or response.url == 'https://weibo.cn/':
             logging.info('NO USER %s', response.url)
             return
 
