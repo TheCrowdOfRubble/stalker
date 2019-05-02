@@ -132,8 +132,7 @@ class _WeiboTimeParser:
     def _get_time_from_year_pattern(self, matched):
         return self._get_this_year() % (matched.group(1), matched.group(2), matched.group(3), matched.group(4))
 
-    @staticmethod
-    def _get_time_from_full_pattern(matched):
+    def _get_time_from_full_pattern(self, matched):
         return "%s-%s-%s %s:%s:%s" % (
             matched.group(1), matched.group(2), matched.group(3), matched.group(4), matched.group(5), matched.group(6))
 

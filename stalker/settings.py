@@ -62,8 +62,9 @@ DOWNLOADER_MIDDLEWARES = {
     'stalker.middlewares.RandomHttpProxyMiddleware': 110,
     'stalker.middlewares.RandomUserAgentMiddleware': 120,
     # 'scrapy.extensions.closespider.CloseSpider': 500,
-
     'stalker.middlewares.HTTPLoggerMiddleware': 999,
+
+    # 'scrapy_redis.pipelines.RedisPipeline': 300,
 }
 
 # Enable or disable extensions
@@ -136,109 +137,178 @@ DB_USE_UNICODE = True
 
 WEIBO_INSERT_SQL = (
     'INSERT INTO `weiboes` ('
-        '`weibo_id`,'
-        '`user_id`,'
-        '`time`,'
-        '`content`,'
-        '`repost_amount`,'
-        '`comment_amount`,'
-        '`like_amount`,'
-        '`origin_weibo_id`,'
-        '`platform`,'
-        '`create_time`,'
-        '`modify_time`'
+    '`weibo_id`,'
+    '`user_id`,'
+    '`time`,'
+    '`content`,'
+    '`repost_amount`,'
+    '`comment_amount`,'
+    '`like_amount`,'
+    '`origin_weibo_id`,'
+    '`platform`,'
+    '`create_time`,'
+    '`modify_time`'
     ') VALUES ('
-        '%s,'
-        '%s,'
-        '%s,'
-        '%s,'
-        '%s,'
-        '%s,'
-        '%s,'
-        '%s,'
-        '%s,'
-        'now(),'
-        'now()'
+    '%s,'
+    '%s,'
+    '%s,'
+    '%s,'
+    '%s,'
+    '%s,'
+    '%s,'
+    '%s,'
+    '%s,'
+    'now(),'
+    'now()'
     ')'
 )
 
 WEIBO_UPDATE_SQL = (
     'UPDATE `weiboes`'
     ' SET '
-        '`user_id` = %s,'
-        '`time` = %s,'
-        '`content` = %s,'
-        '`repost_amount` = %s,'
-        '`comment_amount` = %s,'
-        '`like_amount` = %s,'
-        '`origin_weibo_id` = %s,'
-        '`platform` = %s,'
-        '`modify_time` = now()'
+    '`user_id` = %s,'
+    '`time` = %s,'
+    '`content` = %s,'
+    '`repost_amount` = %s,'
+    '`comment_amount` = %s,'
+    '`like_amount` = %s,'
+    '`origin_weibo_id` = %s,'
+    '`platform` = %s,'
+    '`modify_time` = now()'
     ' WHERE '
-        '`weibo_id` = %s'
+    '`weibo_id` = %s'
 )
 
 USER_INSERT_SQL = (
     'INSERT INTO `users` ('
-       '`user_id`,'
-       '`nickname`,'
-       '`username`,'
-       '`avatar`,'
-       '`weibo_amount`,'
-       '`follow_amount`,'
-       '`follower_amount`,'
-       '`gender`,'
-       '`introduction`,'
-       '`birthday`,'
-       '`certification`,'
-       '`certification_information`,'
-       '`location`,'
-       '`weibo_expert`,'
-       '`sexual_orientation`,'
-       '`relationship_status`,'
-       '`create_time`,'
-       '`modify_time`'
+    '`user_id`,'
+    '`nickname`,'
+    '`username`,'
+    '`avatar`,'
+    '`weibo_amount`,'
+    '`follow_amount`,'
+    '`follower_amount`,'
+    '`gender`,'
+    '`introduction`,'
+    '`birthday`,'
+    '`certification`,'
+    '`certification_information`,'
+    '`location`,'
+    '`weibo_expert`,'
+    '`sexual_orientation`,'
+    '`relationship_status`,'
+    '`create_time`,'
+    '`modify_time`'
     ') VALUES ('
-       '%s,'
-       '%s,'
-       '%s,'
-       '%s,'
-       '%s,'
-       '%s,'
-       '%s,'
-       '%s,'
-       '%s,'
-       '%s,'
-       '%s,'
-       '%s,'
-       '%s,'
-       '%s,'
-       '%s,'
-       '%s,'
-       'now(),'
-       'now()'
+    '%s,'
+    '%s,'
+    '%s,'
+    '%s,'
+    '%s,'
+    '%s,'
+    '%s,'
+    '%s,'
+    '%s,'
+    '%s,'
+    '%s,'
+    '%s,'
+    '%s,'
+    '%s,'
+    '%s,'
+    '%s,'
+    'now(),'
+    'now()'
     ')'
 )
 
 USER_UPDATE_SQL = (
     'UPDATE `users`'
     ' SET '
-        '`nickname` = %s,'
-        '`username` = %s,'
-        '`avatar` = %s,'
-        '`weibo_amount` = %s,'
-        '`follow_amount` = %s,'
-        '`follower_amount` = %s,'
-        '`gender` = %s,'
-        '`introduction` = %s,'
-        '`birthday` = %s,'
-        '`certification` = %s,'
-        '`certification_information` = %s,'
-        '`location` = %s,'
-        '`weibo_expert` = %s,'
-        '`sexual_orientation` = %s,'
-        '`relationship_status` = %s,'
-        '`modify_time` = now()'
+    '`nickname` = %s,'
+    '`username` = %s,'
+    '`avatar` = %s,'
+    '`weibo_amount` = %s,'
+    '`follow_amount` = %s,'
+    '`follower_amount` = %s,'
+    '`gender` = %s,'
+    '`introduction` = %s,'
+    '`birthday` = %s,'
+    '`certification` = %s,'
+    '`certification_information` = %s,'
+    '`location` = %s,'
+    '`weibo_expert` = %s,'
+    '`sexual_orientation` = %s,'
+    '`relationship_status` = %s,'
+    '`modify_time` = now()'
     ' WHERE '
-        '`user_id` = %s'
+    '`user_id` = %s'
 )
+
+# Scrapy-Redis
+
+# Enables scheduling storing requests queue in redis.
+SCHEDULER = "scrapy_redis.scheduler.Scheduler"
+
+# Ensure all spiders share same duplicates filter through redis.
+DUPEFILTER_CLASS = "scrapy_redis.dupefilter.RFPDupeFilter"
+
+# Default requests serializer is pickle, but it can be changed to any module
+# with loads and dumps functions. Note that pickle is not compatible between
+# python versions.
+# Caveat: In python 3.x, the serializer must return strings keys and support
+# bytes as values. Because of this reason the json or msgpack module will not
+# work by default. In python 2.x there is no such issue and you can use
+# 'json' or 'msgpack' as serializers.
+# SCHEDULER_SERIALIZER = "scrapy_redis.picklecompat"
+
+# Don't cleanup redis queues, allows to pause/resume crawls.
+# SCHEDULER_PERSIST = True
+
+# Schedule requests using a priority queue. (default)
+# SCHEDULER_QUEUE_CLASS = 'scrapy_redis.queue.PriorityQueue'
+
+# Alternative queues.
+# SCHEDULER_QUEUE_CLASS = 'scrapy_redis.queue.FifoQueue'
+# SCHEDULER_QUEUE_CLASS = 'scrapy_redis.queue.LifoQueue'
+
+# Max idle time to prevent the spider from being closed when distributed crawling.
+# This only works if queue class is SpiderQueue or SpiderStack,
+# and may also block the same time when your spider start at the first time (because the queue is empty).
+# SCHEDULER_IDLE_BEFORE_CLOSE = 10
+
+# Store scraped item in redis for post-processing.
+# ITEM_PIPELINES = {
+#     'scrapy_redis.pipelines.RedisPipeline': 300
+# }
+
+# The item pipeline serializes and stores the items in this redis key.
+# REDIS_ITEMS_KEY = '%(spider)s:items'
+
+# The items serializer is by default ScrapyJSONEncoder. You can use any
+# importable path to a callable object.
+# REDIS_ITEMS_SERIALIZER = 'json.dumps'
+
+# Specify the host and port to use when connecting to Redis (optional).
+# REDIS_HOST = 'localhost'
+# REDIS_PORT = 6379
+
+# Specify the full Redis URL for connecting (optional).
+# If set, this takes precedence over the REDIS_HOST and REDIS_PORT settings.
+REDIS_URL = 'redis://localhost:6379'
+
+# Custom redis client parameters (i.e.: socket timeout, etc.)
+# REDIS_PARAMS  = {}
+# Use custom redis client class.
+# REDIS_PARAMS['redis_cls'] = 'myproject.RedisClient'
+
+# If True, it uses redis' ``SPOP`` operation. You have to use the ``SADD``
+# command to add URLs to the redis queue. This could be useful if you
+# want to avoid duplicates in your start urls list and the order of
+# processing does not matter.
+# REDIS_START_URLS_AS_SET = False
+
+# Default start urls key for RedisSpider and RedisCrawlSpider.
+# REDIS_START_URLS_KEY = 'stalker:start_urls'
+
+# Use other encoding than utf-8 for redis.
+# REDIS_ENCODING = 'latin1'

@@ -5,21 +5,19 @@ import logging
 
 import scrapy
 from scrapy.loader.processors import MapCompose, TakeFirst, Compose, SelectJmes
+import scrapy_redis.spiders
 
 import utils
 import stalker.items as items
 from stalker.items.processors import get_dict_from_profile, remove_invisible_character, get_weibo_content
 import stalker.settings as settings
+import parser
 
 
-class ZhuangdingSpider(scrapy.Spider):
+class ZhuangdingSpider(scrapy_redis.spiders.RedisSpider):
     name = 'zhuangding'
     allowed_domains = ['weibo.cn']
-    start_urls = [
-        # 'https://weibo.cn/u/1266321801',
-        # 'https://weibo.cn/u/2803301701?f=search_0',
-        'https://weibo.cn/u/2803301711'
-    ]
+    redis_key = 'stalker:start_urls'
 
     def parse(self, response: scrapy.http.Response):
         user_loader = items.UserLoader(response=response)
@@ -46,11 +44,12 @@ class ZhuangdingSpider(scrapy.Spider):
 
         response.meta['user_item'] = user_item
         response.meta['min_time'] = utils.get_datetime("%Y-%m-%d %H:00:00")
+        response.meta['max_page'] = min(parser.get_page_amount(response), settings.MAX_PAGE_VISIT)
         for weibo_item in self.parse_weiboes(response):
             yield weibo_item
 
-    @staticmethod
-    def parse_profile(response: scrapy.http.Response) -> items.UserItem:
+    def parse_profile(self, response: scrapy.http.Response) -> items.UserItem:
+        # 不准搞成 @staticmethod 否则 Scrapy-Redis 不认
         user_item: items.UserItem = response.meta.get('user_item')
         user_loader = items.UserLoader(item=user_item, response=response)
 
@@ -71,6 +70,7 @@ class ZhuangdingSpider(scrapy.Spider):
     def parse_weiboes(self, response: scrapy.http.Response) -> typing.Iterator[items.WeiboItem]:
         user_item = response.meta.get('user_item')
         min_time = response.meta.get('min_time')
+        max_page = response.meta.get('max_page')
 
         beyond = not bool(min_time)  # 未设置 oldest_weibo_datetime 字段就直接设为 True
         for weibo in response.xpath('//div[@class="c"][contains(@id, "M_")]'):
@@ -113,6 +113,9 @@ class ZhuangdingSpider(scrapy.Spider):
                     page_id += 1
             else:
                 page_id = 2
+
+            if page_id > max_page:
+                return
 
             query['page'] = page_id
             url_components = urlparser.ParseResult(
