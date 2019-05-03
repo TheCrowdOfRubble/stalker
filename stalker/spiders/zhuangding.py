@@ -71,7 +71,6 @@ class ZhuangdingSpider(scrapy_redis.spiders.RedisSpider):
     def parse_weiboes(self, response: scrapy.http.Response) -> typing.Iterator[items.WeiboItem]:
         user_item = response.meta.get('user_item')
         min_time = response.meta.get('min_time')
-        max_page = response.meta.get('max_page')
 
         beyond = not bool(min_time)  # 未设置 oldest_weibo_datetime 字段就直接设为 True
         for weibo in response.xpath('//div[@class="c"][contains(@id, "M_")]'):
@@ -179,4 +178,4 @@ class ZhuangdingSpider(scrapy_redis.spiders.RedisSpider):
             "not(contains(@href, '/repost/hot') or contains(@href, '/comment/hot'))]/@href"
         ).getall()
         for elem in users:
-            yield scrapy.Request(url=urlparser.urljoin("https://weibo.cn", elem), priority=666)  # 用户优先处理
+            yield scrapy.Request(url=urlparser.urljoin("https://weibo.cn", elem), priority=90)  # 用户优先处理
