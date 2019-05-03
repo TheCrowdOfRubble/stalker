@@ -9,7 +9,7 @@ import scrapy_redis.spiders
 
 import utils
 import stalker.items as items
-from stalker.items.processors import get_dict_from_profile, remove_invisible_character, get_weibo_content
+from stalker.items.processors import get_dict_from_profile, remove_invisible_character, get_weibo_content, EmptyTo
 import stalker.settings as settings
 import parser
 
@@ -65,6 +65,7 @@ class ZhuangdingSpider(scrapy_redis.spiders.RedisSpider):
             user_loader.add_value(key, key_value_pair[key])
 
         user_item = user_loader.load_item()
+        user_item['username'] = EmptyTo(None)(user_item['username'])  # 即使我加在输出处理器上，仍然不行，只好这么办了
         return user_item
 
     def parse_weiboes(self, response: scrapy.http.Response) -> typing.Iterator[items.WeiboItem]:
@@ -102,34 +103,80 @@ class ZhuangdingSpider(scrapy_redis.spiders.RedisSpider):
             if beyond or weibo_item['time'] < min_time:
                 beyond = True
 
+            # 爬取微博详情页，抓取更多用户
+            for new_request in self._get_more_user(weibo_item):
+                yield new_request
+
+        # 爬取更多页面
         if not beyond:
-            url_components: urlparser.ParseResult = urlparser.urlparse(response.url)
-            query = dict(urlparser.parse_qsl(url_components.query, keep_blank_values=True))
-            if 'page' in query:
-                page_id = Compose(SelectJmes('page'), int)(query)
-                if page_id < 1:
-                    page_id = 1
-                if page_id <= settings.MAX_PAGE_VISIT:
-                    page_id += 1
-            else:
-                page_id = 2
+            new_request = self._read_more_page(response)
+            if new_request:
+                yield new_request
 
-            if page_id > max_page:
-                return
-
-            query['page'] = page_id
-            url_components = urlparser.ParseResult(
-                scheme=url_components.scheme,
-                netloc=url_components.netloc,
-                path=url_components.path,
-                params=None,
-                query=urlparser.urlencode(query),
-                fragment=None
-            )
-            next_page_url = urlparser.urlunparse(url_components)
-
+    def _get_more_user(self, weibo_item: items.WeiboItem):
+        if weibo_item["repost_amount"] > 0:
             yield scrapy.Request(
-                url=next_page_url,
-                callback=self.parse_weiboes,
-                meta=response.meta,
+                url="https://weibo.cn/repost/" + weibo_item['weibo_id'],
+                callback=self._parse_weibo_details,
+                meta={'random': True}
             )
+        if weibo_item["comment_amount"] > 0:
+            yield scrapy.Request(
+                url="https://weibo.cn/comment/" + weibo_item['weibo_id'],
+                callback=self._parse_weibo_details,
+                meta={'random': True}
+            )
+        if weibo_item["like_amount"] > 0:
+            yield scrapy.Request(
+                url="https://weibo.cn/attitude/" + weibo_item['weibo_id'],
+                callback=self._parse_weibo_details,
+                meta={'random': True}
+            )
+
+    def _read_more_page(self, response: scrapy.http.Response):
+        max_page = response.meta.get('max_page')
+        url_components: urlparser.ParseResult = urlparser.urlparse(response.url)
+        query = dict(urlparser.parse_qsl(url_components.query, keep_blank_values=True))
+        if 'page' in query:
+            page_id = Compose(SelectJmes('page'), int)(query)
+            if page_id < 1:
+                page_id = 1
+            if page_id <= settings.MAX_PAGE_VISIT:
+                page_id += 1
+        else:
+            page_id = 2
+
+        if page_id > max_page:
+            return None
+
+        query['page'] = page_id
+        url_components = urlparser.ParseResult(
+            scheme=url_components.scheme,
+            netloc=url_components.netloc,
+            path=url_components.path,
+            params=None,
+            query=urlparser.urlencode(query),
+            fragment=None
+        )
+        next_page_url = urlparser.urlunparse(url_components)
+
+        return scrapy.Request(
+            url=next_page_url,
+            callback=self.parse_weiboes,
+            meta=response.meta,
+        )
+
+    def _parse_weibo_details(self, response):
+        self._get_more_users(response)  # 处理第一页
+
+        page_count = parser.get_page_amount(response)
+        for page in range(2, min(page_count, settings.MAX_PAGE_VISIT)):  # 从第二页开始
+            yield scrapy.Request(url=urlparser.urljoin(response.url, "?page=%d" % page), callback=self._get_more_users)
+
+    def _get_more_users(self, response):
+        users = response.xpath(
+            "//div[@class='c'][preceding-sibling::div[@class='pms'] and following-sibling::div[@class='pa']]/a[1]["
+            "not(contains(@href, '/repost/hot') or contains(@href, '/comment/hot'))]/@href"
+        ).getall()
+        for elem in users:
+            yield scrapy.Request(url=urlparser.urljoin("https://weibo.cn", elem), priority=666)  # 用户优先处理

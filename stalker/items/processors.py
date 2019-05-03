@@ -3,6 +3,7 @@ import re
 import typing
 import urllib.parse
 import logging
+from typing import Pattern
 
 import scrapy.utils.datatypes
 from scrapy.loader.processors import TakeFirst
@@ -23,13 +24,13 @@ def remove_invisible_character(text: str, loader_context: scrapy.utils.datatypes
 class _GetFirstNumber:
     _find_int_pattern = re.compile(r'\d+')
 
-    def __call__(self, text: str, loader_context: scrapy.utils.datatypes.MergeDict) -> int:
-        number = 0
+    def __call__(self, text: str, loader_context: scrapy.utils.datatypes.MergeDict) -> str:
+        number = ''
 
         matched = self._find_int_pattern.search(text)
         if matched:
             number_string = matched.group()
-            number = int(number_string)
+            number = number_string
 
         return number
 
@@ -193,3 +194,14 @@ class _WeiboContentParser:
 
 
 get_weibo_content = _WeiboContentParser()
+
+
+class EmptyTo:
+    def __init__(self, target=0):
+        self.target = target
+
+    def __call__(self, value, loader_context=None):
+        if value:
+            return TakeFirst()(value)
+        else:
+            return self.target

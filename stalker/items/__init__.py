@@ -6,7 +6,7 @@
 # https://doc.scrapy.org/en/latest/topics/items.html
 import scrapy.utils.datatypes
 from scrapy.loader import ItemLoader
-from scrapy.loader.processors import TakeFirst, Compose
+from scrapy.loader.processors import TakeFirst, Compose, Identity, MapCompose
 import stalker.items.processors as processors
 
 
@@ -55,10 +55,18 @@ class UserLoader(ItemLoader):
     default_output_processor = TakeFirst()
 
     user_id_in = Compose(TakeFirst(), processors.get_first_number)
+    user_id_out = Compose(TakeFirst(), int)
+
     username_in = Compose(TakeFirst(), processors.get_username_from_user_detail_page_url)
+
     weibo_amount_in = Compose(TakeFirst(), processors.get_first_number)
+    weibo_amount_out = Compose(TakeFirst(), int)
+
     follow_amount_in = Compose(TakeFirst(), processors.get_first_number)
+    follow_amount_out = Compose(TakeFirst(), int)
+
     follower_amount_in = Compose(TakeFirst(), processors.get_first_number)
+    follower_amount_out = Compose(TakeFirst(), int)
 
 
 class WeiboLoader(ItemLoader):
@@ -66,8 +74,14 @@ class WeiboLoader(ItemLoader):
     default_output_processor = TakeFirst()
 
     weibo_id_in = Compose(TakeFirst(), lambda div_id: div_id[2:])  # div.id == 'M_Hsa2x7GED' -> 'Hsa2x7GED'
+
     time_in = Compose(TakeFirst(), processors.parse_weibo_time)
+
     like_amount_in = Compose(TakeFirst(), processors.get_first_number)
+    like_amount_out = Compose(TakeFirst(), int)
+
     repost_amount_in = Compose(TakeFirst(), processors.get_first_number)
+    repost_amount_out = Compose(TakeFirst(), int)
+
     comment_amount_in = Compose(TakeFirst(), processors.get_first_number)
-    # origin_weibo_id_in = Compose(TakeFirst())
+    comment_amount_out = Compose(TakeFirst(), int)
