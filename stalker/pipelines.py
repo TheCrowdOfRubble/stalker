@@ -10,6 +10,7 @@ import logging
 import twisted.python.failure
 from twisted.enterprise import adbapi
 import scrapy
+from scrapy_redis.pipelines import RedisPipeline
 
 import stalker.items as items
 import stalker.settings as settings
@@ -118,3 +119,12 @@ class PersistencePipeline:
     @staticmethod
     def _error_handler(failure, item):
         logging.warning("ERROR IN UPDATE %s", item)
+
+
+class WeiboItemExportToRedisPipeline(RedisPipeline):
+    def __init__(self, server):
+        super().__init__(server)
+
+    def process_item(self, item, spider):
+        if isinstance(item, items.WeiboItem):
+            super().process_item(item, spider)

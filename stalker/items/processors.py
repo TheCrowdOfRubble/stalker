@@ -202,6 +202,6 @@ class EmptyTo:
 
     def __call__(self, value, loader_context=None):
         if value:
-            return TakeFirst()(value)
+            return value
         else:
             return self.target

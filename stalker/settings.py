@@ -76,6 +76,7 @@ DOWNLOADER_MIDDLEWARES = {
 # Configure item pipelines
 # See https://doc.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
+    'scrapy_redis.pipelines.RedisPipeline': 299,
     'stalker.pipelines.PersistencePipeline': 300,
 }
 
@@ -104,7 +105,7 @@ HTTPCACHE_DIR = '/tmp/'
 # LOG_ENABLED = False
 LOG_LEVEL = 'INFO'
 
-DEPTH_LIMIT = 5
+DEPTH_LIMIT = 2
 
 # DEPTH_PRIORITY = -1
 
@@ -282,7 +283,7 @@ DUPEFILTER_CLASS = "scrapy_redis.dupefilter.RFPDupeFilter"
 # }
 
 # The item pipeline serializes and stores the items in this redis key.
-# REDIS_ITEMS_KEY = '%(spider)s:items'
+REDIS_ITEMS_KEY = 'weibo:weibo_mq'
 
 # The items serializer is by default ScrapyJSONEncoder. You can use any
 # importable path to a callable object.
