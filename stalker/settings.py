@@ -26,7 +26,7 @@ CONCURRENT_REQUESTS = 128
 # Configure a delay for requests for the same website (default: 0)
 # See https://doc.scrapy.org/en/latest/topics/settings.html#download-delay
 # See also autothrottle settings and docs
-DOWNLOAD_DELAY = 0.1
+# DOWNLOAD_DELAY = 0.1
 # The download delay setting will honor only one of:
 CONCURRENT_REQUESTS_PER_DOMAIN = 64
 CONCURRENT_REQUESTS_PER_IP = 64
@@ -76,7 +76,7 @@ DOWNLOADER_MIDDLEWARES = {
 # Configure item pipelines
 # See https://doc.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
-    'scrapy_redis.pipelines.RedisPipeline': 299,
+    # 'scrapy_redis.pipelines.RedisPipeline': 299,
     'stalker.pipelines.PersistencePipeline': 300,
 }
 
@@ -105,7 +105,7 @@ HTTPCACHE_DIR = '/tmp/'
 # LOG_ENABLED = False
 LOG_LEVEL = 'INFO'
 
-DEPTH_LIMIT = 2
+# DEPTH_LIMIT = 2
 
 # DEPTH_PRIORITY = -1
 

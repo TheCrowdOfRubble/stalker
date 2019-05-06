@@ -3,7 +3,6 @@ import re
 import typing
 import urllib.parse
 import logging
-from typing import Pattern
 
 import scrapy.utils.datatypes
 from scrapy.loader.processors import TakeFirst
