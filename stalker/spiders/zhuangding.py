@@ -3,7 +3,7 @@ from typing import Union, Iterator
 import urllib.parse as urlparser
 import logging
 
-import scrapy_redis.spiders
+from scrapy_redis.spiders import RedisSpider
 from scrapy.http import Request, Response
 from scrapy.loader.processors import MapCompose, TakeFirst
 
@@ -13,88 +13,50 @@ import stalker.items as items
 import stalker.settings as settings
 import utils
 from stalker.parse import FetchItemsAndNext
+import stalker.parse.user as userparser
+import stalker.parse.weibo as weiboparser
 
 
-class ZhuangdingSpider(scrapy_redis.spiders.RedisSpider):
+class ZhuangdingSpider(RedisSpider, userparser.User, weiboparser.Weibo):
     name = 'zhuangding'
     allowed_domains = ['weibo.cn']
-    redis_key = 'stalker:start_urls'
 
     def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.weibo_parser = FetchItemsAndNext()
+        super(RedisSpider, self).__init__(**kwargs)
+        super(userparser.User, self).__init__()
+        super(weiboparser.Weibo, self).__init__()
 
-    def parse(self, response: Response) -> Union[Iterator[Request], Iterator[items.WeiboItem], type(None)]:
-        """
-        解析用户详情页，产生 user_item 的一部分 https://weibo.cn/rmrb
-        """
-        user_loader = items.UserLoader(response=response)
-
-        user_profile_url = user_loader.get_css('a[href$="/info"]::attr(href)', TakeFirst())
-
+    def parse(self, response: Response) -> Union[type(None), items.UserItem, items.WeiboItem, Request]:
+        user_profile_page_url = response.css('a[href$="/info"]::attr(href)').get()
         # 该用户不存在，如 https://weibo.cn/u/3 ，或该用户被封禁，如 https://weibo.cn/u/2803301711 ,或是自己的用户
-        if not user_profile_url or response.url == 'https://weibo.cn/' and not utils.is_my_account(response):
+        if not user_profile_page_url or response.url == 'https://weibo.cn/':
             logging.info('NO USER %s', response.url)
             return None
 
-        user_loader.add_value('user_id', user_profile_url)
-        user_loader.add_xpath('weibo_amount', '//div[@class="tip2"]/span/text()')
-        user_loader.add_xpath('follow_amount', '//div[@class="tip2"]/a[1]/text()')
-        user_loader.add_xpath('follower_amount', '//div[@class="tip2"]/a[2]/text()')
+        # 获取基本 user_item
+        user_item = self.get_base_user_item(response)
 
-        user_item = user_loader.load_item()  # 并不全的用户资料
-
-        # 爬取用户资料页
+        # 补全 user_item
         yield Request(
             url='https://weibo.cn/%d/info' % user_item['user_id'],
-            callback=self.parse_profile,
+            callback=self.get_full_user_item,
             meta={'user_item': user_item},
             priority=100,  # 优先采集用户
         )
 
-        # 爬取用户粉丝页
-        # yield Request(
-        #     url='https://weibo.cn/%d/info' % user_item['user_id'],
-        #     callback=self.parse_profile,
-        #     meta={'user_item': user_item},
-        #     priority=99,  # 优先采集用户
-        # )
+        # 获取粉丝们
+        yield Request(
+            url='https://weibo.cn/%d/fans' % user_item['user_id'],
+            callback=self.get_all_fans,
+            priority=90,  # 优先采集用户
+        )
 
         # 只有从消息队列中取出的任务才抓取微博，其他的都不抓，比如从微博详情页抓的新用户（默认是抓的，除非显示说明不抓）
         if response.meta.get('dont_fetch_weibo'):
             return None
 
-        # response.meta['user_item'] = user_item
-        # response.meta['min_time'], response.meta['max_time'] = utils.get_an_hour_period()  # 抓取的最大、小发表时间 [小, 大)
-        # response.meta['max_page'] = utils.get_page_amount(response)  # 最大翻页数
-        # for weibo_item in self.parse_weiboes(response):
-        #     yield weibo_item
-
-    def parse_weiboes(self, response: Response) -> items.WeiboItem:
-        FetchItemsAndNext()(response)
-
-
-    def parse_profile(self, response: Response) -> items.UserItem:
-        """
-        解析用户资料页，补全 user_item https://weibo.cn/3282669464/info
-        不准搞成 @staticmethod，否则 Scrapy-Redis 不认
-        """
-        user_item: items.UserItem = response.meta.get('user_item')
-        user_loader = items.UserLoader(item=user_item, response=response)
-
-        user_loader.add_xpath('avatar', '//img[@alt="头像"]/@src')
-
-        # 将资料页处理成 kv 格式
-        key_value_pairs_in_profile = user_loader.get_xpath(
-            '//div[@class="c"]/text()',
-            MapCompose(remove_invisible_character, get_dict_from_profile)
-        )
-
-        for key_value_pair in key_value_pairs_in_profile:
-            key = TakeFirst()(key_value_pair)
-            user_loader.add_value(key, key_value_pair[key])
-
-        user_item = user_loader.load_item()
-        user_item['username'] = EmptyTo(None)(user_item['username'])  # 即使我加在输出处理器上，仍然不行，只好这么办了
-
-        return user_item
+        # 获取微博们
+        response.meta['user_item'] = user_item
+        response.meta['min_time'], response.meta['max_time'] = utils.get_an_hour_period()  # 发表时间 [min, max)
+        for rtn in self.get_all_weiboes(response):
+            yield rtn

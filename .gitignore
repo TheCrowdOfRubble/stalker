@@ -247,6 +247,9 @@ pip-selfcheck.json
 
 # End of https://www.gitignore.io/api/venv,linux,python,virtualenv,pycharm+all
 
+# Settings
+/stalker/settings.py
+
 # Accounts
 /utils/account/accounts/*.json
 /utils/account/accounts/*.bak

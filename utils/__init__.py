@@ -1,19 +1,18 @@
-import urllib.parse as urlparser
-import logging
-
 import datetime
 import json
+import logging
 import sys
+import urllib.parse as urlparser
 
 import requests
 import scrapy
-from scrapy.loader.processors import MapCompose, TakeFirst, Compose, SelectJmes
+from scrapy.loader.processors import Compose, SelectJmes
 
 import stalker.settings as settings
 
 
 def get_random_proxy() -> str:
-    return "http://" + requests.get("http://127.0.0.1:5010/get/").content.decode('utf-8')
+    return "http://" + requests.get(settings.HTTP_PROXY_URL + "get/").content.decode('utf-8')
 
 
 def get_datetime(time_format="%Y-%m-%d %H:%M:%S"):

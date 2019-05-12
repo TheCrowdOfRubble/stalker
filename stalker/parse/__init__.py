@@ -1,28 +1,43 @@
-from typing import Callable, List, Tuple
+from typing import Callable, List, Tuple, Any, Iterator, Union, Dict
 
 from scrapy.http import Request, Response
+from icecream import ic
 
 from stalker.parse.url import WeiboUrl
 
 
 class FetchItemsAndNext:
-    fetch: Callable[[Response], Tuple[List, bool]]
-
-    def __init__(self, fetch: Callable[[Response], Tuple[List, bool]], callback: Callable):
-        self.fetch = fetch
+    def __init__(
+            self,
+            fetch_all: Callable[[Response], List],
+            parse_single: Callable[[Any], Iterator[Union[Any, bool]]],
+            callback: Callable[[Response], Any],
+            meta: Dict = None
+    ):
+        self.fetch_all = fetch_all
         self.callback = callback
+        self.parse_single = parse_single
+        self.meta = meta
 
     def __call__(self, response: Response):
-        items, has_next = self.fetch(response)
+        items = self.fetch_all(response)
         for item in items:
-            yield {'user': item}
+            rtns = list(self.parse_single(item))
 
-        url = WeiboUrl(response=response)
-        next_url = next(url)
+            for rtn in rtns[:-1]:
+                yield rtn
 
-        if has_next and next_url:
-            yield Request(
-                url=next_url,
-                callback=self.callback,
-                meta=response.meta,
-            )
+            has_next = rtns[-1]
+            if not has_next:
+                break
+        else:  # 没有遇见中间停住的情况，就读下一页
+            url = WeiboUrl(response=response)
+            next_url = next(url)
+
+            if next_url:
+                print(next_url)
+                yield Request(
+                    url=next_url,
+                    callback=self.callback,
+                    meta=self.meta,
+                )

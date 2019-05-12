@@ -32,8 +32,8 @@ class PersistencePipeline:
         )
 
     def process_item(self, item: items.BaseItem, spider: scrapy.Spider) -> type(None):
-        print(item)
-        return
+        # print(item)
+        # return
         if isinstance(item, items.UserItem):
             self._process_user_item(item)
         elif isinstance(item, items.WeiboItem):

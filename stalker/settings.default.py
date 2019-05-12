@@ -105,7 +105,7 @@ HTTPCACHE_DIR = '/tmp/'
 # LOG_ENABLED = False
 LOG_LEVEL = 'INFO'
 
-DEPTH_LIMIT = 4
+# DEPTH_LIMIT = 2
 
 # DEPTH_PRIORITY = -1
 
@@ -125,16 +125,12 @@ IGNORE_URLS = [
 # 每个人的历史微博与微博评论最多翻几页
 MAX_PAGE_VISIT = 5
 
-
-# 代理地址
-HTTP_PROXY_URL = 'http://111.231.14.117:15510/'
-
 DB_DRIVER = 'MySQLdb'
 DB_NAME = 'weibo'
-DB_HOST = '111.231.14.117'
-DB_PORT = 43990
+DB_HOST = '127.0.0.1'
+DB_PORT = 3306
 DB_USER = 'root'
-DB_PASSWORD = 'P@55w0rd!.mysql.baronhou'
+DB_PASSWORD = 'rootroot'
 DB_CHARSET = 'utf8mb4'
 DB_MIN_POOL_SIZE = 50
 DB_MAX_POOL_SIZE = 300
@@ -255,8 +251,7 @@ USER_UPDATE_SQL = (
 SCHEDULER = "scrapy_redis.scheduler.Scheduler"
 
 # Ensure all spiders share same duplicates filter through redis.
-# DUPEFILTER_CLASS = "scrapy_redis.dupefilter.RFPDupeFilter"
-DUPEFILTER_CLASS = "scrapy.dupefilters.BaseDupeFilter"  # 取消去重
+DUPEFILTER_CLASS = "scrapy_redis.dupefilter.RFPDupeFilter"
 
 # Default requests serializer is pickle, but it can be changed to any module
 # with loads and dumps functions. Note that pickle is not compatible between
@@ -300,7 +295,7 @@ REDIS_ITEMS_KEY = 'weibo:weibo_mq'
 
 # Specify the full Redis URL for connecting (optional).
 # If set, this takes precedence over the REDIS_HOST and REDIS_PORT settings.
-REDIS_URL = 'redis://:P@55w0rd!.redis.baronhou@111.231.14.117:63240'
+REDIS_URL = 'redis://localhost:6379'
 
 # Custom redis client parameters (i.e.: socket timeout, etc.)
 # REDIS_PARAMS  = {}
@@ -311,10 +306,10 @@ REDIS_URL = 'redis://:P@55w0rd!.redis.baronhou@111.231.14.117:63240'
 # command to add URLs to the redis queue. This could be useful if you
 # want to avoid duplicates in your start urls list and the order of
 # processing does not matter.
-REDIS_START_URLS_AS_SET = True
+# REDIS_START_URLS_AS_SET = False
 
 # Default start urls key for RedisSpider and RedisCrawlSpider.
-REDIS_START_URLS_KEY = 'stalker:start_urls'
+# REDIS_START_URLS_KEY = 'stalker:start_urls'
 
 # Use other encoding than utf-8 for redis.
 # REDIS_ENCODING = 'latin1'
