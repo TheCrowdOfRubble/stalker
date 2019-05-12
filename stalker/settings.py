@@ -255,8 +255,8 @@ USER_UPDATE_SQL = (
 SCHEDULER = "scrapy_redis.scheduler.Scheduler"
 
 # Ensure all spiders share same duplicates filter through redis.
-# DUPEFILTER_CLASS = "scrapy_redis.dupefilter.RFPDupeFilter"
-DUPEFILTER_CLASS = "scrapy.dupefilters.BaseDupeFilter"  # 取消去重
+DUPEFILTER_CLASS = "scrapy_redis.dupefilter.RFPDupeFilter"  # 由外部控制，整点删除去重 key
+# DUPEFILTER_CLASS = "scrapy.dupefilters.BaseDupeFilter"  # 取消去重，太过危险
 
 # Default requests serializer is pickle, but it can be changed to any module
 # with loads and dumps functions. Note that pickle is not compatible between

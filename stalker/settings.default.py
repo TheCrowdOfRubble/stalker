@@ -63,8 +63,6 @@ DOWNLOADER_MIDDLEWARES = {
     'stalker.middlewares.RandomUserAgentMiddleware': 120,
     # 'scrapy.extensions.closespider.CloseSpider': 500,
     'stalker.middlewares.HTTPLoggerMiddleware': 999,
-
-    # 'scrapy_redis.pipelines.RedisPipeline': 300,
 }
 
 # Enable or disable extensions
@@ -76,7 +74,7 @@ DOWNLOADER_MIDDLEWARES = {
 # Configure item pipelines
 # See https://doc.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
-    # 'scrapy_redis.pipelines.RedisPipeline': 299,
+    'scrapy_redis.pipelines.RedisPipeline': 299,
     'stalker.pipelines.PersistencePipeline': 300,
 }
 
@@ -105,7 +103,7 @@ HTTPCACHE_DIR = '/tmp/'
 # LOG_ENABLED = False
 LOG_LEVEL = 'INFO'
 
-# DEPTH_LIMIT = 2
+DEPTH_LIMIT = 4
 
 # DEPTH_PRIORITY = -1
 
@@ -124,6 +122,10 @@ IGNORE_URLS = [
 
 # 每个人的历史微博与微博评论最多翻几页
 MAX_PAGE_VISIT = 5
+
+
+# 代理地址
+HTTP_PROXY_URL = 'http://111.231.14.117:15510/'
 
 DB_DRIVER = 'MySQLdb'
 DB_NAME = 'weibo'
@@ -251,7 +253,8 @@ USER_UPDATE_SQL = (
 SCHEDULER = "scrapy_redis.scheduler.Scheduler"
 
 # Ensure all spiders share same duplicates filter through redis.
-DUPEFILTER_CLASS = "scrapy_redis.dupefilter.RFPDupeFilter"
+DUPEFILTER_CLASS = "scrapy_redis.dupefilter.RFPDupeFilter"  # 由外部控制，整点删除去重 key
+# DUPEFILTER_CLASS = "scrapy.dupefilters.BaseDupeFilter"  # 取消去重，太过危险
 
 # Default requests serializer is pickle, but it can be changed to any module
 # with loads and dumps functions. Note that pickle is not compatible between
@@ -306,10 +309,10 @@ REDIS_URL = 'redis://localhost:6379'
 # command to add URLs to the redis queue. This could be useful if you
 # want to avoid duplicates in your start urls list and the order of
 # processing does not matter.
-# REDIS_START_URLS_AS_SET = False
+REDIS_START_URLS_AS_SET = True
 
 # Default start urls key for RedisSpider and RedisCrawlSpider.
-# REDIS_START_URLS_KEY = 'stalker:start_urls'
+REDIS_START_URLS_KEY = 'stalker:start_urls'
 
 # Use other encoding than utf-8 for redis.
 # REDIS_ENCODING = 'latin1'
