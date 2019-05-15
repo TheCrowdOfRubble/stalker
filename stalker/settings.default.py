@@ -63,6 +63,8 @@ DOWNLOADER_MIDDLEWARES = {
     'stalker.middlewares.RandomUserAgentMiddleware': 120,
     # 'scrapy.extensions.closespider.CloseSpider': 500,
     'stalker.middlewares.HTTPLoggerMiddleware': 999,
+
+    # 'scrapy_redis.pipelines.RedisPipeline': 300,
 }
 
 # Enable or disable extensions
@@ -74,7 +76,7 @@ DOWNLOADER_MIDDLEWARES = {
 # Configure item pipelines
 # See https://doc.scrapy.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
-    'scrapy_redis.pipelines.RedisPipeline': 299,
+    'stalker.pipelines.WeiboItemExportToRedisPipeline': 299,
     'stalker.pipelines.PersistencePipeline': 300,
 }
 
@@ -94,7 +96,7 @@ AUTOTHROTTLE_TARGET_CONCURRENCY = 64
 # Enable and configure HTTP caching (disabled by default)
 # See https://doc.scrapy.org/en/latest/topics/downloader-middleware.html#httpcache-middleware-settings
 HTTPCACHE_ENABLED = True
-HTTPCACHE_EXPIRATION_SECS = 3600
+HTTPCACHE_EXPIRATION_SECS = 1800
 HTTPCACHE_DIR = '/tmp/'
 # HTTPCACHE_IGNORE_HTTP_CODES = [500, 501, 502, 503, 504, 403, 404]
 # HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
@@ -103,7 +105,7 @@ HTTPCACHE_DIR = '/tmp/'
 # LOG_ENABLED = False
 LOG_LEVEL = 'INFO'
 
-DEPTH_LIMIT = 4
+DEPTH_LIMIT = 2
 
 # DEPTH_PRIORITY = -1
 

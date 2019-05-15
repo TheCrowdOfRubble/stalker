@@ -10,7 +10,7 @@ import logging
 import twisted.python.failure
 from twisted.enterprise import adbapi
 import scrapy
-from scrapy_redis.pipelines import RedisPipeline
+from scrapy_redis.pipelines import RedisPipeline, default_serialize, defaults
 
 import stalker.items as items
 import stalker.settings as settings
@@ -116,6 +116,7 @@ class PersistencePipeline:
         def exec_sql(cursor: adbapi.Transaction, item: items.BaseItem) -> type(None):
             cursor.execute(raw_sql, item)
             logging.info(cursor._last_executed)
+
         return exec_sql
 
     @staticmethod
@@ -124,9 +125,11 @@ class PersistencePipeline:
 
 
 class WeiboItemExportToRedisPipeline(RedisPipeline):
-    def __init__(self, server):
-        super().__init__(server)
+    def __init__(self, server, key=defaults.PIPELINE_KEY, serialize_func=default_serialize):
+        super().__init__(server, key, serialize_func)
 
     def process_item(self, item, spider):
         if isinstance(item, items.WeiboItem):
             super().process_item(item, spider)
+
+        return item
