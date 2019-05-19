@@ -11,7 +11,10 @@ from scrapy.loader.processors import Compose, SelectJmes
 import stalker.settings as settings
 
 
-def get_random_proxy() -> str:
+def get_random_proxy():
+    proxy = requests.get(settings.HTTP_PROXY_URL + "get/").content.decode('utf-8')
+    if proxy == 'no proxy!':
+        return None
     return "http://" + requests.get(settings.HTTP_PROXY_URL + "get/").content.decode('utf-8')
 
 

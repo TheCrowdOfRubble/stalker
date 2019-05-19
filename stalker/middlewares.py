@@ -60,7 +60,7 @@ class RandomUserAgentMiddleware:
 class HTTPLoggerMiddleware:
     @staticmethod
     def process_request(request, spider):
-        logging.warning(
+        logging.info(
             "%s %s %s %s",
             request.url,
             request.meta.get('proxy'),
@@ -84,6 +84,6 @@ class BadResponseDropperMiddleware:
 
             account_name = request.meta.get('account_name')
             if account_name:
-                logging.error('ACCOUNT %s FAILED IN %s', account_name, request.url)
+                logging.critical('ACCOUNT %s FAILED IN %s', account_name, request.url)
                 account.remove_account(account_name)
             raise scrapy.exceptions.IgnoreRequest('IGNORE %s' % request.url)

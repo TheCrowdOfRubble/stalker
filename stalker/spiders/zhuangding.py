@@ -1,20 +1,14 @@
 # -*- coding: utf-8 -*-
-from typing import Union, Iterator
-import urllib.parse as urlparser
 import logging
+from typing import Union
 
-from scrapy_redis.spiders import RedisSpider
 from scrapy.http import Request, Response
-from scrapy.loader.processors import MapCompose, TakeFirst
+from scrapy_redis.spiders import RedisSpider
 
-from stalker.items.processors import get_dict_from_profile, remove_invisible_character, EmptyTo, get_weibo_content
-import parser
 import stalker.items as items
-import stalker.settings as settings
-import utils
-from stalker.parse import FetchItemsAndNext
 import stalker.parse.user as userparser
 import stalker.parse.weibo as weiboparser
+import utils
 
 
 class ZhuangdingSpider(RedisSpider, userparser.User, weiboparser.Weibo):
@@ -37,19 +31,19 @@ class ZhuangdingSpider(RedisSpider, userparser.User, weiboparser.Weibo):
         user_item = self.get_base_user_item(response)
 
         # 补全 user_item
-        yield Request(
-            url='https://weibo.cn/%d/info' % user_item['user_id'],
-            callback=self.get_full_user_item,
-            meta={'user_item': user_item},
-            priority=100,  # 优先采集用户
-        )
+        # yield Request(
+        #     url='https://weibo.cn/%d/info' % user_item['user_id'],
+        #     callback=self.get_full_user_item,
+        #     meta={'user_item': user_item},
+        #     priority=100,  # 优先采集用户
+        # )
 
         # 获取粉丝们
-        yield Request(
-            url='https://weibo.cn/%d/fans' % user_item['user_id'],
-            callback=self.get_all_fans,
-            priority=90,  # 优先采集用户
-        )
+        # yield Request(
+        #     url='https://weibo.cn/%d/fans' % user_item['user_id'],
+        #     callback=self.get_all_fans,
+        #     priority=90,  # 优先采集用户
+        # )
 
         # 只有从消息队列中取出的任务才抓取微博，其他的都不抓，比如从微博详情页抓的新用户（默认是抓的，除非显示说明不抓）
         if response.meta.get('dont_fetch_weibo'):

@@ -26,7 +26,7 @@ CONCURRENT_REQUESTS = 128
 # Configure a delay for requests for the same website (default: 0)
 # See https://doc.scrapy.org/en/latest/topics/settings.html#download-delay
 # See also autothrottle settings and docs
-# DOWNLOAD_DELAY = 0.1
+DOWNLOAD_DELAY = 0.1
 # The download delay setting will honor only one of:
 CONCURRENT_REQUESTS_PER_DOMAIN = 64
 CONCURRENT_REQUESTS_PER_IP = 64
@@ -61,10 +61,7 @@ DOWNLOADER_MIDDLEWARES = {
     'stalker.middlewares.RandomAccountMiddleware': 100,
     'stalker.middlewares.RandomHttpProxyMiddleware': 110,
     'stalker.middlewares.RandomUserAgentMiddleware': 120,
-    # 'scrapy.extensions.closespider.CloseSpider': 500,
     'stalker.middlewares.HTTPLoggerMiddleware': 999,
-
-    # 'scrapy_redis.pipelines.RedisPipeline': 300,
 }
 
 # Enable or disable extensions
@@ -109,10 +106,9 @@ DEPTH_LIMIT = 2
 
 # DEPTH_PRIORITY = -1
 
-# CLOSESPIDER_PAGECOUNT = 1000
-
 # Retry when proxies fail
-RETRY_TIMES = 3
+# RETRY_TIMES = 0
+RETRY_ENABLED = False
 
 # Retry on most error codes since proxies fail for different reasons
 RETRY_HTTP_CODES = [500, 503, 504, 400, 403, 404, 408, 418]
@@ -123,11 +119,11 @@ IGNORE_URLS = [
 ]
 
 # 每个人的历史微博与微博评论最多翻几页
-MAX_PAGE_VISIT = 5
+MAX_PAGE_VISIT = 1
 
 
-# 代理地址
-HTTP_PROXY_URL = 'http://111.231.14.117:15510/'
+# 代理库地址
+HTTP_PROXY_URL = 'http://127.0.0.1:5000/'
 
 DB_DRIVER = 'MySQLdb'
 DB_NAME = 'weibo'
@@ -311,7 +307,7 @@ REDIS_URL = 'redis://localhost:6379'
 # command to add URLs to the redis queue. This could be useful if you
 # want to avoid duplicates in your start urls list and the order of
 # processing does not matter.
-REDIS_START_URLS_AS_SET = True
+# REDIS_START_URLS_AS_SET = True # 不需要去重，因为数据库自带查重
 
 # Default start urls key for RedisSpider and RedisCrawlSpider.
 REDIS_START_URLS_KEY = 'stalker:start_urls'

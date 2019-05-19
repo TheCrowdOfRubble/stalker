@@ -1,17 +1,14 @@
-from typing import Union, Iterator, Callable, List, Tuple
 import urllib.parse as urlparser
-import logging
+from typing import Union, Iterator, List
 
+from scrapy.http import Response, Request
+from scrapy.loader.processors import TakeFirst
 from scrapy.selector import Selector
-from scrapy.http import Request, Response
-from scrapy.loader.processors import MapCompose, TakeFirst
-from icecream import ic
 
-from stalker.items.processors import remove_invisible_character, get_dict_from_profile, EmptyTo, get_weibo_content
+import stalker.items as items
+from stalker.items.processors import get_weibo_content
 from stalker.parse import FetchItemsAndNext
 from stalker.parse.user import FetchUsersAndNext
-import stalker.items as items
-import utils
 
 
 class Weibo:
@@ -43,24 +40,24 @@ class Weibo:
             weibo_item = weibo_loader.load_item()
 
             # 从微博详情页抓取更多用户
-            if weibo_item["repost_amount"] > 0:
-                yield Request(
-                    url="https://weibo.cn/repost/" + weibo_item['weibo_id'],
-                    callback=self.get_all_interactor,
-                    meta={'random': True}
-                )
-            if weibo_item["comment_amount"] > 0:
-                yield Request(
-                    url="https://weibo.cn/comment/" + weibo_item['weibo_id'],
-                    callback=self.get_all_interactor,
-                    meta={'random': True}
-                )
-            if weibo_item["like_amount"] > 0:
-                yield Request(
-                    url="https://weibo.cn/attitude/" + weibo_item['weibo_id'],
-                    callback=self.get_all_interactor,
-                    meta={'random': True}
-                )
+            # if weibo_item["repost_amount"] > 0:
+            #     yield Request(
+            #         url="https://weibo.cn/repost/" + weibo_item['weibo_id'],
+            #         callback=self.get_all_interactor,
+            #         meta={'random': True}
+            #     )
+            # if weibo_item["comment_amount"] > 0:
+            #     yield Request(
+            #         url="https://weibo.cn/comment/" + weibo_item['weibo_id'],
+            #         callback=self.get_all_interactor,
+            #         meta={'random': True}
+            #     )
+            # if weibo_item["like_amount"] > 0:
+            #     yield Request(
+            #         url="https://weibo.cn/attitude/" + weibo_item['weibo_id'],
+            #         callback=self.get_all_interactor,
+            #         meta={'random': True}
+            #     )
 
             is_pinned = weibo_loader.get_css('.kt', TakeFirst())  # 置顶微博
             if min_time <= weibo_item['time'] < max_time:  # [min, max)
