@@ -6,7 +6,9 @@ import logging
 
 import scrapy.utils.datatypes
 from scrapy.loader.processors import TakeFirst
+from scrapy.linkextractors import LinkExtractor
 from w3lib.html import remove_tags
+from scrapy.http.response.html import HtmlResponse
 
 
 def strip(text: str) -> str:
@@ -204,3 +206,15 @@ class EmptyTo:
             return value
         else:
             return self.target
+
+
+class TagsExtractor:
+    tags_extractor = LinkExtractor(allow=(r'https://m.weibo.cn/search.+q%3D%23.+%23'))
+
+    def __call__(self, text):
+        response = HtmlResponse(url="", encoding='utf-8', body=text)
+        links = self.tags_extractor.extract_links(response)
+        return list(map(lambda tag: tag.text[1:-1], links))
+
+
+tags_extractor = TagsExtractor()

@@ -1,9 +1,8 @@
-import functools
-import json
-import os
 import glob
-import random
+import json
 import logging
+import os
+import random
 
 # /run/media/baronhou/Data/Projects/python/a_crowd_of_rubble/stalker/stalker/utils/useragent
 _BASE_PATH = os.path.dirname(os.path.realpath(__file__))
@@ -12,17 +11,19 @@ _accounts = {}
 _account_names = []
 
 
-def _reduce_cookie_to_one_line(x1, x2):
-    if "expirationDate" in x1:
-        x1 = {x1["name"]: x1["value"]}
-    x1[x2["name"]] = x2["value"]
-    return x1
+def _get_account_name(path: str):
+    filename = path.rsplit('/', 1)[1]
+    account_name = filename.rsplit('.', 1)[0]
+    return account_name
 
 
 for account_file_name in glob.glob(os.path.join(_BASE_PATH, 'accounts', '*.json')):
     with open(account_file_name) as f:
-        cookie = functools.reduce(_reduce_cookie_to_one_line, json.load(f))
-        _accounts[account_file_name] = cookie
+        account_name = _get_account_name(account_file_name)
+        cookies = {}
+        for part in json.load(f):
+            cookies[part['name']] = part['value']
+        _accounts[account_name] = cookies
 
 _account_names = list(_accounts.keys())
 

@@ -16,6 +16,13 @@ import stalker.items as items
 import stalker.settings as settings
 
 
+class PrintPipeline:
+    @staticmethod
+    def process_item(item: items.BaseItem, spider: scrapy.Spider) -> type(None):
+        print(type(item), item)
+        return item
+
+
 class PersistencePipeline:
     def __init__(self) -> type(None):
         self.db_pool = adbapi.ConnectionPool(
@@ -119,7 +126,7 @@ class PersistencePipeline:
 
     @staticmethod
     def _error_handler(failure, item):
-        logging.warning("ERROR IN UPDATE %s", item)
+        logging.warning("ERROR IN UPDATE (%s) %s", failure, item)
 
 
 class WeiboItemExportToRedisPipeline(RedisPipeline):

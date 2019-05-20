@@ -14,6 +14,10 @@ import utils
 class ZhuangdingSpider(RedisSpider, userparser.User, weiboparser.Weibo):
     name = 'zhuangding'
     allowed_domains = ['weibo.cn']
+    custom_settings = {
+        "SCHEDULER": "scrapy_redis.scheduler.Scheduler",
+        "DUPEFILTER_CLASS": "scrapy_redis.dupefilter.RFPDupeFilter"
+    }
 
     def __init__(self, **kwargs):
         super(RedisSpider, self).__init__(**kwargs)

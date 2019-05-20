@@ -7,6 +7,7 @@ import urllib.parse as urlparser
 import requests
 import scrapy
 from scrapy.loader.processors import Compose, SelectJmes
+from scrapy.http import Response
 
 import stalker.settings as settings
 
@@ -81,3 +82,11 @@ def is_my_account(response: scrapy.http.Response) -> bool:
         return True
 
     return False
+
+
+def debug_response(response: Response):
+    return {
+        'url': response.url,
+        'proxy': response.meta['proxy'],
+        'ua': response.meta['ua']
+    }

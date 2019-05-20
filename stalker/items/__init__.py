@@ -4,9 +4,14 @@
 #
 # See documentation in:
 # https://doc.scrapy.org/en/latest/topics/items.html
+from datetime import datetime
+
 import scrapy.utils.datatypes
 from scrapy.loader import ItemLoader
-from scrapy.loader.processors import TakeFirst, Compose, Identity, MapCompose
+from scrapy.loader.processors import TakeFirst, Compose, Identity, MapCompose, SelectJmes
+from scrapy.linkextractors import LinkExtractor
+from dateutil import parser
+
 import stalker.items.processors as processors
 
 
@@ -49,6 +54,8 @@ class WeiboItem(BaseItem):
     origin_weibo_id = scrapy.Field()
     platform = scrapy.Field()
 
+    tags = scrapy.Field()  # 不会存到数据库中去
+
 
 class UserLoader(ItemLoader):
     default_item_class = UserItem
@@ -85,3 +92,65 @@ class WeiboLoader(ItemLoader):
 
     comment_amount_in = Compose(TakeFirst(), processors.get_first_number)
     comment_amount_out = Compose(TakeFirst(), int)
+
+
+class BaseJsonLoader(ItemLoader):
+    default_item_class = BaseItem
+    default_output_processor = TakeFirst()
+
+    FIELD_MAPPING = {}
+
+    def __init__(self, obj: dict):
+        super().__init__()
+
+        for json_key in obj:
+            if json_key not in self.FIELD_MAPPING:
+                continue
+            db_key = self.FIELD_MAPPING[json_key]
+            self.add_value(db_key, obj[json_key])
+
+
+class UserJsonLoader(BaseJsonLoader):
+    default_item_class = UserItem
+    FIELD_MAPPING = {
+        'id': 'user_id',
+        'screen_name': 'nickname',
+        'avatar_hd': 'avatar',
+        'statuses_count': 'weibo_amount',
+        'follow_count': 'follow_amount',
+        'followers_count': 'follower_amount',
+        'gender': 'gender',
+        'description': 'certification_information',
+        'verified_reason': 'certification_information',
+    }
+
+    # gender_in = Compose(lambda gender: '女' if gender == 'f' else '男')
+    gender_in = Compose(TakeFirst(), lambda gender: '女' if gender == 'f' else '男')
+
+
+def _get_tags(text):
+    pass
+
+
+class WeiboJsonLoader(BaseJsonLoader):
+    default_item_class = WeiboItem
+    FIELD_MAPPING = {
+        'bid': 'weibo_id',
+        'user': 'user_id',
+        'created_at': 'time',
+        'raw_text': 'content',
+        'reposts_count': 'repost_amount',
+        'comments_count': 'comment_amount',
+        'attitudes_count': 'like_amount',
+        'retweeted_status': 'origin_weibo_id',
+        'text': 'tags',
+    }
+
+    user_id_in = Compose(TakeFirst(), SelectJmes('id'))
+
+    origin_weibo_id_in = Compose(TakeFirst(), SelectJmes('bid'))
+
+    time_in = Compose(TakeFirst(), parser.parse, lambda date: datetime.strftime(date, '%Y-%m-%d %H:%M:%S'))
+
+    tags_in = Compose(TakeFirst(), processors.tags_extractor)
+    tags_out = Identity()

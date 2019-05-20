@@ -4,15 +4,47 @@
 #
 # See documentation in:
 # https://doc.scrapy.org/en/latest/topics/spider-middleware.html
+import json
 import logging
+import re
 
 import scrapy
 import scrapy.exceptions
+from scrapy.downloadermiddlewares.retry import RetryMiddleware
+from scrapy.http import Request, Response
 
 import utils
 import utils.useragent as useragent
 import utils.account as account
 import stalker.settings as settings
+
+
+class FullRandomMiddleware:
+    api_to_page_pattern = re.compile(r'info\?uid=')
+
+    def process_request(self, request: Request, spider):
+        # retry_times = request.meta.get('retry_times')
+        # if retry_times:
+        #     retry_times = int(retry_times)
+        # else:
+        #     retry_times = 0
+        #
+        # request.headers['referer'] = self.api_to_page_pattern.sub('', request.url)
+        #
+        # if retry_times < settings.MAX_RETRY_TIMES:
+        #     request.meta['proxy'] = utils.get_random_proxy()
+        #     request.headers.setdefault('User-Agent', useragent.get_random_useragent())
+        # else:
+        #     RandomAccountMiddleware.process_request(request, spider)
+        #     request.meta['proxy'] = None
+        #     request.headers['User-Agent'] = settings.USER_AGENT
+        #     request.headers['x-xsrf-token'] = request.cookies.get("XSRF-TOKEN")
+
+        request.headers['referer'] = self.api_to_page_pattern.sub('', request.url)
+        # RandomAccountMiddleware.process_request(request, spider)
+        request.meta['proxy'] = None
+        request.headers['User-Agent'] = settings.USER_AGENT
+        # request.headers['x-xsrf-token'] = request.cookies.get("XSRF-TOKEN")
 
 
 class RandomAccountMiddleware:
@@ -59,25 +91,27 @@ class RandomUserAgentMiddleware:
 
 class HTTPLoggerMiddleware:
     @staticmethod
-    def process_request(request, spider):
-        logging.info(
-            "%s %s %s %s",
-            request.url,
-            request.meta.get('proxy'),
-            request.meta.get('account_name'),
-            request.headers['User-Agent']
-        )
+    def process_request(request: Request, spider):
+        # logging.info(
+        #     "%s %s %s %s",
+        #     request.url,
+        #     request.meta.get('proxy'),
+        #     request.meta.get('account_name'),
+        #     request.headers['User-Agent']
+        # )
+        print(request.headers, request.cookies, request.body, request.meta)
 
     @staticmethod
-    def process_response(request, response, spider):
-        if response.status not in [200, 301, 302]:
+    def process_response(request, response: Response, spider):
+        logging.info(response.headers)
+        if response.status not in [200]:
             logging.error("BAD RESPONSE %s %s", response.status, request.url)
         return response
 
 
 class BadResponseDropperMiddleware:
     @staticmethod
-    def process_request(request: scrapy.http.Request, spider: scrapy.Spider) -> type(None):
+    def process_request(request: Request, spider: scrapy.Spider) -> type(None):
         for ignore_url in settings.IGNORE_URLS:
             if not request.url.startswith(ignore_url):
                 continue
