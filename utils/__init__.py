@@ -11,7 +11,7 @@ settings = get_project_settings()
 
 
 def get_random_proxy():
-    if random.randint(0, 9) <= settings['CHANCE_OF_USE_PROXY']:  # 有几率不使用代理
+    if random.randint(0, 9) <= int(settings['CHANCE_OF_USE_PROXY']):  # 有几率不使用代理
         return None
 
     proxy = requests.get(settings['HTTP_PROXY_URL'] + "get/").content.decode('utf-8')
