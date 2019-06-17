@@ -4,8 +4,7 @@ import re
 from scrapy.http import Request, Response
 from scrapy.exceptions import IgnoreRequest
 
-from stalker import settings
-from utils import get_random_proxy
+from utils import settings, get_random_proxy
 import utils.account as account
 import utils.useragent as useragent
 
@@ -82,7 +81,7 @@ class RandomUserAgentMiddleware:
 class BadResponseDropperMiddleware:
     @staticmethod
     def process_request(request: Request, spider) -> type(None):
-        for ignore_url in settings.IGNORE_URLS:
+        for ignore_url in settings['IGNORE_URLS']:
             if not request.url.startswith(ignore_url):
                 continue
 

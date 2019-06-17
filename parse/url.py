@@ -4,7 +4,7 @@ import logging
 
 from scrapy.http import Response
 
-from stalker.settings import MAX_PAGE_VISIT
+from utils import settings
 from utils import get_page_amount
 
 
@@ -22,7 +22,7 @@ class WeiboUrl:
 
         self.parse_result = urlparse(url)
         self.query = dict(parse_qsl(self.parse_result.query, keep_blank_values=True))
-        self.max_page = MAX_PAGE_VISIT
+        self.max_page = settings['MAX_PAGE_VISIT']
         if response:
             self.max_page = min(get_page_amount(response), self.max_page)
 

@@ -4,20 +4,21 @@ import json
 import sys
 
 from scrapy.http import Response
+from scrapy.utils.project import get_project_settings
 import requests
 
-import stalker.settings as settings
+settings = get_project_settings()
 
 
 def get_random_proxy():
-    if random.randint(0, 9) <= settings.CHANCE_OF_USE_PROXY:  # 有几率不使用代理
+    if random.randint(0, 9) <= settings['CHANCE_OF_USE_PROXY']:  # 有几率不使用代理
         return None
 
-    proxy = requests.get(settings.HTTP_PROXY_URL + "get/").content.decode('utf-8')
+    proxy = requests.get(settings['HTTP_PROXY_URL'] + "get/").content.decode('utf-8')
     if proxy == 'no proxy!':
         return None
 
-    return "http://" + requests.get(settings.HTTP_PROXY_URL + "get/").content.decode('utf-8')
+    return "http://" + requests.get(settings['HTTP_PROXY_URL'] + "get/").content.decode('utf-8')
 
 
 def get_datetime(time_format="%Y-%m-%d %H:%M:%S"):

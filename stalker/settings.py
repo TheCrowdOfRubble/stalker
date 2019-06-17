@@ -51,9 +51,9 @@ TELNETCONSOLE_ENABLED = False
 HTTP_PROXY_URL = 'http://111.231.14.117:15510/'
 
 # 使用代理的几率
-CHANCE_OF_USE_PROXY = 5  # N / 10
+CHANCE_OF_USE_PROXY = 0  # N / 10
 if os.environ.get('DEV'):
-    CHANCE_OF_USE_PROXY = 10  # N / 10
+    CHANCE_OF_USE_PROXY = 10
 
 # 最多翻页数
 MAX_PAGE_VISIT = 20
@@ -128,8 +128,6 @@ RETRY_TIMES = 5
 
 # Ensure all spiders share same duplicates filter through redis.
 DUPEFILTER_CLASS = "scrapy_redis.dupefilter.RFPDupeFilter"  # 由外部控制，整点删除去重 key
-if os.environ.get('DEV'):
-    pass
 
 # Default requests serializer is pickle, but it can be changed to any module
 # with loads and dumps functions. Note that pickle is not compatible between
@@ -169,8 +167,6 @@ REDIS_ITEMS_KEY = 'weibo:weibo_mq'
 # Specify the full Redis URL for connecting (optional).
 # If set, this takes precedence over the REDIS_HOST and REDIS_PORT settings.
 REDIS_URL = 'redis://:P@55w0rd!.redis.baronhou@111.231.14.117:63240'
-if os.environ.get('REDIS_URL'):
-    REDIS_URL = os.environ.get('REDIS_URL')
 
 # Custom redis client parameters (i.e.: socket timeout, etc.)
 # REDIS_PARAMS  = {}

@@ -7,7 +7,7 @@ import twisted.python.failure
 import scrapy
 
 from utils import get_an_hour_period
-import stalker.settings as settings
+from utils import settings
 import items
 
 
@@ -22,15 +22,15 @@ class PersistencePipeline:
     def __init__(self) -> type(None):
         self.db_pool = adbapi.ConnectionPool(
             "MySQLdb",
-            db=settings.DB_NAME,
-            host=settings.DB_HOST,
-            port=settings.DB_PORT,
-            user=settings.DB_USER,
-            passwd=settings.DB_PASSWORD,
-            charset=settings.DB_CHARSET,
-            cp_min=settings.DB_MIN_POOL_SIZE,
-            cp_max=settings.DB_MAX_POOL_SIZE,
-            use_unicode=settings.DB_USE_UNICODE,
+            db=settings['DB_NAME'],
+            host=settings['DB_HOST'],
+            port=settings['DB_PORT'],
+            user=settings['DB_USER'],
+            passwd=settings['DB_PASSWORD'],
+            charset=settings['DB_CHARSET'],
+            cp_min=settings['DB_MIN_POOL_SIZE'],
+            cp_max=settings['DB_MAX_POOL_SIZE'],
+            use_unicode=settings['DB_USE_UNICODE'],
         )
 
     def process_item(self, item: items.BaseItem, spider: scrapy.Spider) -> type(None):
@@ -43,7 +43,7 @@ class PersistencePipeline:
             logging.critical("GET WRONG ITEM %s", item)
 
     def _process_user_item(self, user_item):
-        self.db_pool.runInteraction(self._exec_sql(settings.USER_INSERT_SQL), (
+        self.db_pool.runInteraction(self._exec_sql(settings['USER_INSERT_SQL']), (
             user_item["user_id"],
             user_item["nickname"],
             user_item["username"],
@@ -63,7 +63,7 @@ class PersistencePipeline:
         )).addErrback(self._update_user_item, user_item)
 
     def _process_weibo_item(self, weibo_item):
-        self.db_pool.runInteraction(self._exec_sql(settings.WEIBO_INSERT_SQL), (
+        self.db_pool.runInteraction(self._exec_sql(settings['WEIBO_INSERT_SQL']), (
             weibo_item["weibo_id"],
             weibo_item["user_id"],
             weibo_item["time"],
@@ -77,7 +77,7 @@ class PersistencePipeline:
 
     def _update_user_item(self, failure: twisted.python.failure.Failure, user_item: items.UserItem) -> type(None):
         self.db_pool.runInteraction(
-            self._exec_sql(settings.USER_UPDATE_SQL), (
+            self._exec_sql(settings['USER_UPDATE_SQL']), (
                 user_item["nickname"],
                 user_item["username"],
                 user_item["avatar"],
@@ -99,7 +99,7 @@ class PersistencePipeline:
 
     def _update_weibo_item(self, failure: twisted.python.failure.Failure, weibo_item: items.WeiboItem) -> type(None):
         self.db_pool.runInteraction(
-            self._exec_sql(settings.WEIBO_UPDATE_SQL), (
+            self._exec_sql(settings['WEIBO_UPDATE_SQL']), (
                 weibo_item["user_id"],
                 weibo_item["time"],
                 weibo_item["content"],

@@ -12,7 +12,6 @@ class MWeiboCnSpider(RedisSpider):
     allowed_domains = ['m.weibo.cn']
     custom_settings = {
         "SCHEDULER": "scrapy_redis.scheduler.Scheduler",
-        # 'REDIS_START_URLS_KEY': 'm.weibo.cn:start_urls',
         'COOKIES_ENABLED': False,
 
         'DEFAULT_REQUEST_HEADERS': {
