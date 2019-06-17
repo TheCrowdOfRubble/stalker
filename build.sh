@@ -9,5 +9,5 @@ done
 
 for iid in `sudo docker images|grep "^<none>" | awk '{print $3}'`
 do
-    sudo docker rm $iid
+    sudo docker rmi $iid
 done
