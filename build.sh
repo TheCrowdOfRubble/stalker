@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-git pull
 sudo docker build -t stalker .
 
 for cid in `sudo docker ps -a | grep Exited | awk '{print $1}'`
