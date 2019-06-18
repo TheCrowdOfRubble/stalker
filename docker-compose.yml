@@ -5,4 +5,4 @@ services:
         environment:
             - TZ=Asia/Shanghai
             - spider=m.weibo.cn
-            - SCRAPY_CHANCE_OF_USE_PROXY=2
+            - SCRAPY_CHANCE_OF_USE_PROXY=5

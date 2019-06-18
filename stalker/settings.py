@@ -22,15 +22,15 @@ USER_AGENT = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Ge
 ROBOTSTXT_OBEY = False
 
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
-CONCURRENT_REQUESTS = 8888
+CONCURRENT_REQUESTS = 88
 
 # Configure a delay for requests for the same website (default: 0)
 # See https://doc.scrapy.org/en/latest/topics/settings.html#download-delay
 # See also autothrottle settings and docs
-# DOWNLOAD_DELAY = 3
+DOWNLOAD_DELAY = 0.05
 # The download delay setting will honor only one of:
-CONCURRENT_REQUESTS_PER_DOMAIN = 8888
-CONCURRENT_REQUESTS_PER_IP = 8888
+CONCURRENT_REQUESTS_PER_DOMAIN = 88
+CONCURRENT_REQUESTS_PER_IP = 88
 
 # Disable cookies (enabled by default)
 # COOKIES_ENABLED = False
@@ -51,9 +51,9 @@ TELNETCONSOLE_ENABLED = False
 HTTP_PROXY_URL = 'http://111.231.14.117:15510/'
 
 # 使用代理的几率
-CHANCE_OF_USE_PROXY = 0  # N / 10
+CHANCE_OF_USE_PROXY = 20  # N / 100
 if os.environ.get('DEV'):
-    CHANCE_OF_USE_PROXY = 10
+    CHANCE_OF_USE_PROXY = 100
 
 # 最多翻页数
 MAX_PAGE_VISIT = 20
