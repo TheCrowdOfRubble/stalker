@@ -33,7 +33,7 @@ def get_datetime(time_format="%Y-%m-%d %H:%M:%S"):
 
 
 class TimePeriodGetter:
-    an_hour_delta = datetime.timedelta(hours=2)  # fake
+    an_hour_delta = datetime.timedelta(hours=3)  # fake
 
     def __call__(self):
         now = datetime.datetime.now()
