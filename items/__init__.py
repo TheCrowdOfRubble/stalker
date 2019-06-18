@@ -135,6 +135,12 @@ class WeiboJsonLoader(BaseJsonLoader):
         'source': ['platform'],
     }
 
+    def __init__(self, obj: dict):
+        super().__init__(obj)
+
+        if 'retweeted_status' in obj and 'text' in obj['retweeted_status']:
+            self.add_value('topics', obj['retweeted_status']['text'])
+
     user_id_in = Compose(TakeFirst(), SelectJmes('id'))
 
     origin_weibo_id_in = Compose(TakeFirst(), SelectJmes('bid'))
@@ -144,4 +150,4 @@ class WeiboJsonLoader(BaseJsonLoader):
     content_in = Compose(TakeFirst(), remove_tags)
 
     topics_in = Compose(TakeFirst(), processors.tags_extractor)
-    topics_out = Identity()
+    topics_out = Compose(dict.fromkeys, list)  # tag 去重
