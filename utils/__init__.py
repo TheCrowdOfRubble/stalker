@@ -10,7 +10,7 @@ import requests
 
 settings = get_project_settings()
 
-extra_proxy_pattern = re.compile('(?<=<p>).+</p>')
+extra_proxy_pattern = re.compile('(?<=<p>).+(?=</p>)')
 
 
 def get_random_proxy():
